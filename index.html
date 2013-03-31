@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+	<head>
+        <meta charset="utf-8">
+		<title>DANMAKU PLAYER v</title>
+        <link rel="stylesheet" href="style/x.css" media="all">
+	</head>
+	<body>
+        <!-- 数媒的logo -->
+        <img src="style/logo.png" alt="" id="logo">
+        <!-- 选择演示弹幕 -->
+        <div id="select-danmaku">
+            弹幕源&nbsp;
+            <select name="" id="danmaku-source-list">
+                <option value="local/av364356.xml" selected>BILI-1</option>
+                <option value="local/av271.xml">BILI-2</option>
+                <option value="local/test.xml">测试</option>
+                <option value="backend/DM.php?vid=123456">BILI</option>
+            </select>
+        </div>
+        
+        <div id="wrapper">
+            <div id="player">
+                <!-- 弹幕舞台 -->
+                <div id="stage">
+                    <div id="play-button">▶</div>
+                </div>
+                <!-- video -->
+                <video src="video/BadApplePV.mp4" width="512" height="384"></video>
+
+                <!-- 进度条 -->
+                <div id="controller">
+                    <div id="timeline"></div>
+                </div>
+            </div>
+            <!-- 发送弹幕 -->
+            <form id="send-danmaku" action="#" method="GET">
+                <!-- 选择新弹幕的类型 -->
+                <select name="" id="danmaku-type">
+                    <option value="1">正向滚动弹幕</option>
+                    <option value="6">逆向滚动弹幕</option>
+                    <option value="4">底部弹幕</option>
+                    <option value="5">顶部弹幕</option>
+                    <option value="7">特殊弹幕</option>
+                </select>
+                <!-- 弹幕文本 -->
+                <input type="text" id="danmaku-text">
+                <input type="submit" value="发送" id="do-send-danmaku">
+            </form>
+        </div>
+		
+        <!-- 弹幕列表 -->
+        <div id="danmaku-list"></div>
+
+		<!-- Scripts -->
+        <script src="js/svg.min.js"></script>
+		<script src="js/player.utility.js"></script>
+        <script src="js/player.danmaku.js"></script>
+        <script src="js/player.danmaku.spaceManager.js"></script>
+		<script src="js/player.x.js"></script>
+	</body>
+</html>
