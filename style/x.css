@@ -59,6 +59,7 @@ svg{
 }
 text{
 	cursor: text;
+	text-shadow: 1px 1px 2px #000;
 }
 #controller{
 	background: #ccc;
