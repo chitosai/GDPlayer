@@ -26,7 +26,7 @@ body{
 }
 
 #wrapper{
-	width: 518px;
+	width: 548px;
 	margin: 0 auto;
 	padding: 13% 0 0;
 }
@@ -37,7 +37,7 @@ body{
 	padding: 3px;
 }
 video{
-
+	background: #000;
 }
 #play-button{
 	background: rgba(0, 0, 0, .75);
@@ -48,7 +48,7 @@ video{
 	padding: 0 10px 5px;
 	position: absolute;
 	top: 174px;
-	left: 240px;
+	left: 252px;
 	z-index: 999;
 }
 #stage{
@@ -81,7 +81,7 @@ text{
 	100% { width: 100%; }
 }
 #send-danmaku{
-	margin: 10px 0;
+	margin: 10px;
 }
 #danmaku-type{
 	border: 1px solid #aaa;
