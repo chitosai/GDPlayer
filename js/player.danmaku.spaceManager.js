@@ -26,7 +26,7 @@ DANMAKU.prototype.ScrollDanmaku = function( pool, layer_index ) {
     } 
     // y=0的位置插不进，就一条条遍历弹幕，尝试插到现有弹幕中间
     for( var i = 0; i < layer.length; i++ ) {
-        var y = layer[i].bottom;
+        var y = layer[i].bottom + 1;
         // 如果已经越界了就不要继续试了
         if( y + this.height > stage.height ) {
             break;
@@ -53,7 +53,7 @@ DANMAKU.prototype.ScrollDanmakuVCheck = function( y, layer ) {
     for( var i = 0; i < layer.length; i++ ) {
         var target = layer[i];
         // 在y轴上没有交界，那肯定是没有碰撞了
-        if( target.y >= bottom || target.bottom <= y )
+        if( target.y > bottom || target.bottom < y )
             continue;
         // 在y轴上有交界，这时要判断x轴是否可能有碰撞
         // 如果x轴一开始就相交了，那肯定没戏了

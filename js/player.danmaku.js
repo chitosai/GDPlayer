@@ -23,7 +23,7 @@ var DANMAKU = function( opt, time ) {
     this.date    = opt['date'];
     this.hash    = opt['hash'];
     this.opacity = opt['opacity'] ? opt['opacity'] : 1;
-    this.font    = opt['font'] ? opt['font'] : 'Heiti, Sans-serif';
+    this.font    = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
     this.ctime   = time;
 
     // 尺寸和位置会在setPosition中设置
@@ -70,7 +70,6 @@ DANMAKU.prototype.setPosition = function() {
     } else {
         this.width = parseInt(this.node.node.getBBox().width);
         this.x = stage.width;
-        this.speed = (this.width + stage.width) / GLOBAL_CONFIG.danmaku_life_time * ( 1000 / GLOBAL_CONFIG.fps );
     }
 
     // 为这条弹幕分配Y轴坐标
@@ -87,15 +86,19 @@ DANMAKU.prototype.setPosition = function() {
  *
  */
 DANMAKU.prototype.frame = function( time ) {
+    var time_passed = time - this.ctime,
+        dlt = GLOBAL_CONFIG.danmaku_life_time;
     // 检查弹幕生存时间是否结束
     // 因为弹幕并不是都会移动的，所以只有用生存时间来检测越界
-    if( (time-this.ctime) > GLOBAL_CONFIG.danmaku_life_time ) {
+    if( time_passed > dlt ) {
         this.remove();
     }
 
     // 根据弹幕类别来决定action
     switch( this.mode ) {
-        case 1 : this.x -= this.speed; this.node.move(this.x, this.y); break;
+        case 1 : // 水平移动
+                this.x = (stage.width + this.width) / dlt * (dlt - time_passed) - this.width; 
+                this.node.move(this.x, this.y); break;
         case 4 : // bottom弹幕有一条消失时把其余弹幕向下移动，顶到边界
                 if( this.y < this.toY ) { 
                     // 向下移动
@@ -137,6 +140,25 @@ DANMAKU.init = function( danmaku_xml_url ) {
     // 读取弹幕文件
     DANMAKU.load( danmaku_xml_url );
 }
+
+/*
+ * 销毁弹幕池
+ *
+ */
+DANMAKU.clear = function() {
+    // 让整个运行列表中的实例全部执行自毁函数
+    while( RUNNING_LIST.length ) {
+        RUNNING_LIST[0].remove();
+    }
+
+    // 然后清除对原有列表的引用，初始化弹幕池的各种状态
+    DANMAKU_LIST = [];
+    RUNNING_LIST = [];
+    DANMAKU_LAST_POS  = 0;
+    DANMAKU_LAST_TIME = 0; // LAST_TIME也必须清0，这样才会触发DANMAKU.t2p重新查找弹幕位置
+    DANMAKU_POOL = {'scroll': [], 'top': [], 'bottom': [], 'reverse': []};
+}
+
 
 /*
  * 读取弹幕文件
@@ -234,7 +256,8 @@ DANMAKU.parse = function( xmlDoc ) {
 
             // mode=7是特殊弹幕
             if( obj.mode < 7 ) {
-                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "\n");
+                // \n前面是一个全角空格，不然完全空白的行无法显示出来
+                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
             } else {
                 if( obj.mode == 7 ) {
                     try {
@@ -316,24 +339,6 @@ DANMAKU.list = function() {
     danmaku_list_dom.appendChild(ul);
 }
 
-/*
- * 销毁弹幕池
- *
- */
-DANMAKU.clear = function() {
-    // 让整个运行列表中的实例全部执行自毁函数
-    // 这里为了保证安全，动态每次获取RUNNING_LIST.length
-    for( var i = 0; i < RUNNING_LIST.length; i++ ) {
-        RUNNING_LIST[i].remove();
-    }
-
-    // 然后清除对原有列表的引用，初始化弹幕池的各种状态
-    DANMAKU_LIST = [];
-    RUNNING_LIST = [];
-    DANMAKU_LAST_POS  = 0;
-    DANMAKU_LAST_TIME = 0; // LAST_TIME也必须清0，这样才会触发DANMAKU.t2p重新查找弹幕位置
-    DANMAKU_POOL = {'scroll': [], 'top': [], 'bottom': [], 'reverse': []};
-}
 
 /*
  * 二分查找某个时间点在弹幕列表中位置
@@ -402,11 +407,9 @@ DANMAKU.update = function( time ) {
  */
 DANMAKU.frame = function( time ) {
     // 遍历弹幕池
-    var len = RUNNING_LIST.length;
-    for( var i = 0; i < len; i++ ) {
-        try {
+    // 执行效率好像有点低，必须动态获取RUNNING_LIST的长度..
+    for( var i = 0; i < RUNNING_LIST.length; i++ ) {
             // 调用每个弹幕实例的运算函数，自己去计算下一帧的状态
             RUNNING_LIST[i].frame( time );
-        } catch(e) {}
     }
 }

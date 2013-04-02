@@ -61,6 +61,9 @@ text{
 	cursor: text;
 	text-shadow: 1px 1px 2px #000;
 }
+text:hover{
+	fill: #f90;
+}
 #controller{
 	background: #ccc;
 	width: 100%;
