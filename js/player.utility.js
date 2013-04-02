@@ -118,10 +118,11 @@ var STAGE = function(stage, video) {
     stage.style.zIndex = 99999;
     stage.style.top = this.top + 'px';
     stage.style.left = this.left + 'px';
+    stage.style.width = this.width + 'px';
+    stage.style.height = this.height + 'px';
 
-    // 生成svg
-    this.svg = SVG( stage );
-    this.svg.size( this.width, this.height );
+    // 保留对stage的引用
+    this.dom = stage;
 }
 
 
@@ -129,6 +130,7 @@ var STAGE = function(stage, video) {
  * video管理类 (・∀・)
  * 
  */
+var TIME = 0; // 当前播放时间
 var VIDEO = function( video, controller ) {
     var self = this;
 
@@ -141,7 +143,7 @@ var VIDEO = function( video, controller ) {
     this.len = this.video.duration;
     this.update = 0; // 检查更新，包括视频进度条和新弹幕插入
     this.frame = 0;  // 每帧的计算与显示
-    self.precentage = 0; // 专门用来更新进度条的计时器
+    self.timer = 0; // 专门用来更新播放进度
     
     // 初始化进度条总长度
     this.controller.style.animationDuration = this.len + 's';
@@ -156,18 +158,22 @@ var VIDEO = function( video, controller ) {
         // 新弹幕加入弹幕池的更新间隔
         self.update = setInterval( function() {
             // 检查是否有新弹幕需要加入弹幕池的循环
-            DANMAKU.update( self.video.currentTime * 1000 );
+            DANMAKU.update();
         }, GLOBAL_CONFIG.update_delay );
         // 正在显示的弹幕的每帧
         self.frame = setInterval( function() {
             // 当前弹幕池中的弹幕更新
-            DANMAKU.frame( self.video.currentTime * 1000 );
+            DANMAKU.frame();
         }, 1000/GLOBAL_CONFIG.fps );
+        self.timer = setInterval( function() {
+            TIME = self.video.currentTime * 1000;
+        }, 10);
     };
     // 清除timer
     this.stopTimer = function() {
         clearInterval( self.update );
         clearInterval( self.frame );
+        clearInterval( self.timer );
     };
 
     /*

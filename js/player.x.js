@@ -5,6 +5,7 @@ var GLOBAL_CONFIG = {
     'fps'               : 30,   // 渲染帧数
     'danmaku_life_time' : 5000, // 弹幕显示时间
     'opacity'           : 1,    // 全局弹幕透明度
+    'y_move_duration'   : 200,  // top/bottom弹幕重新排列时移动时间
 };
 
 function init() {
@@ -19,10 +20,10 @@ function init() {
 	    document.querySelector('#stage').addEventListener( 'click', function(e) {
 	        // 判断点击来自哪里
 	        // 如果直接点击svg或播放按钮可以切换播放状态
-	        if( e.target.nodeName == 'svg' || e.target.id == 'play-button' ) 
+	        if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
 	            video.togglePlay();
 	        // 如果点击在文字上可能是想复制之类的
-	        else if( e.target.nodeName == 'text' || e.target.nodeName == 'tspan' ) 
+	        else if( e.target.nodeName == 'DIV' ) 
 	            return false;
 	        // 不应该还有其他元素... 
 	        else 

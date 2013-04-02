@@ -237,11 +237,14 @@ DANMAKU.prototype.removeFromDanmakuLayer = function() {
         case 4 : 
             // 把消失的弹幕从弹幕层中移走
             this.layer.shift();
-            // 底部和顶部弹幕这个就复杂啦。准备在老弹幕消失后把新弹幕填充上去
+            // 底部和顶部弹幕这个就复杂一点。准备在老弹幕消失后把新弹幕填充上去
             // 注意不要让弹幕跑到屏幕外去了
             var bottom_border = stage.height - this.height;
             for( var i = 0; i < this.layer.length; i++ ) {
-                this.layer[i].toY += this.height;
+                var self = this.layer[i];
+                self.toY += this.height;
+                self.yLastMove = TIME;
+                self.ySpeed = Math.abs(self.toY - self.y) / GLOBAL_CONFIG.y_move_duration;
                 if( this.layer[i].toY > bottom_border ) this.layer[i].toY = bottom_border;
             }
             break;
@@ -250,7 +253,10 @@ DANMAKU.prototype.removeFromDanmakuLayer = function() {
             this.layer.shift();
             // 顶部弹幕，把底部反过来
             for( var i = 0; i < this.layer.length; i++ ) {
-                this.layer[i].toY -= this.height;
+                var self = this.layer[i];
+                self.toY -= this.height;
+                self.yLastMove = TIME;
+                self.ySpeed = Math.abs(self.toY - self.y) / GLOBAL_CONFIG.y_move_duration;
                 if( this.layer[i].toY < 0 ) this.layer[i].toY = 0;
             }
             break;

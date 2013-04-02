@@ -26,15 +26,25 @@ var DANMAKU = function( opt, time ) {
     this.font    = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
     this.ctime   = time;
 
-    // 尺寸和位置会在setPosition中设置
-    this.width = 0;
-    this.height = 0;
-    this.x = 0;
-    this.y = 0;
+    // 生成文本节点！
+    this.dom = document.createElement('div');
+    this.dom.className = 'danmaku';
+    this.dom.innerHTML = this.text;
+    this.dom.style.color = this.color;
+    this.dom.style.fontSize = this.size + 'px';
+    this.dom.style.fontFamily = this.font;
+    this.dom.style.opacity = this.opacity;
 
-    // 这是top/bottom弹幕消失的时候剩余弹幕重新定位用的
-    this.toY = 0;
-    this.ySpeed = 8;
+    // 带上响应的特殊class
+    this.className = 'danmaku ';
+    switch( this.mode ) {
+        case 1 :
+        case 6 : this.className += 'scrollDanmaku'; break;
+        case 4 : this.className += 'bottomDanmaku'; break;
+        case 5 : this.className += 'topDanmaku'; break;
+        case 7 : this.className += 'specialDanmaku'; break;
+    }
+    this.dom.className = this.className;
 
     // 高级弹幕专用
     // 如果有rotate效果
@@ -42,20 +52,21 @@ var DANMAKU = function( opt, time ) {
     //     cmt.style.transform = "rotateY(" + (data.rY > 180 && data.rY < 270?(0-data.rY):data.rY) + "deg) rotateZ(" + (data.rZ > 180 && data.rZ < 270?(0-data.rZ):data.rZ) + "deg)";
     // }
 
-    // 生成SVG TEXT NODE
-    this.node = stage.svg
-                     .text(this.text)
-                     .fill(this.color)
-                     .font({
-                        'family'  : this.font,
-                        'size'    : this.size,
-                        'opacity' : this.opacity,
-                     });
+    // 插入文本节点
+    stage.dom.appendChild(this.dom);
+
+    // 宽高必须在生成DOM后才能获取
+    this.width = this.dom.offsetWidth;
+    this.height = this.dom.offsetHeight;
+    // 然后得把高宽写回dom上，不然它撑不起来
+    this.dom.style.width = this.width + 'px';
+    this.dom.style.height = this.height + 'px';
+
+    this.speed = (stage.width + this.width) / GLOBAL_CONFIG.danmaku_life_time;
 
     // 为这条弹幕分配坐标
     this.setPosition();
-    // 将弹幕放置到初始位置上
-    this.node.move(this.x, this.y)
+
     // 加入RUNNING_LIST
     RUNNING_LIST.push(this);
 
@@ -68,10 +79,7 @@ var DANMAKU = function( opt, time ) {
  * 
  */
 DANMAKU.prototype.setPosition = function() {
-    this.height = parseInt(this.node.node.getBBox().height);
-    this.width = parseInt(this.node.node.getBBox().width);
-    this.speed = (stage.width + this.width) / GLOBAL_CONFIG.danmaku_life_time;
-    // 根据情况来
+    // 调用每种弹幕各自的定位方法
     switch( this.mode ) {
         case 1 : // 正向滚动弹幕初始时放在屏幕右侧以外
                 this.x = stage.width;
@@ -80,6 +88,7 @@ DANMAKU.prototype.setPosition = function() {
         case 4 : // 顶部/底部固定弹幕居中
                 this.x = (stage.width - this.width)/2;
                 this.BottomDanmaku( DANMAKU_POOL['bottom'], 0 );
+                break;
         case 5 : 
                 this.x = (stage.width - this.width)/2;
                 this.TopDanmaku( DANMAKU_POOL['top'], 0 );
@@ -91,49 +100,57 @@ DANMAKU.prototype.setPosition = function() {
         case 7 : // 高级弹幕，这个是最复杂的情况...
                 break;
     }
+    // 将弹幕放置到初始位置上
+    this.dom.style.left = this.x + 'px';
+    this.dom.style.top = this.y + 'px';
 }
 
 /*
  * 弹幕实例每帧的逻辑运算
  *
  */
-DANMAKU.prototype.frame = function( time ) {
-    var time_passed = time - this.ctime;
+DANMAKU.prototype.frame = function() {
+    var time = TIME,
+        timePassed = time - this.ctime;
     // 检查弹幕生存时间是否结束
     // 因为弹幕并不是都会移动的，所以只有用生存时间来检测越界
-    if( time_passed > GLOBAL_CONFIG.danmaku_life_time ) {
+    if( timePassed > GLOBAL_CONFIG.danmaku_life_time ) {
         this.remove();
     }
 
     // 根据弹幕类别来决定action
     switch( this.mode ) {
         case 1 : // 水平移动
-                this.x = this.speed * (GLOBAL_CONFIG.danmaku_life_time - time_passed) - this.width; 
-                this.node.move(this.x, this.y); 
+                this.x = this.speed * (GLOBAL_CONFIG.danmaku_life_time - timePassed) - this.width; 
+                this.dom.style.left = this.x + 'px';
+                this.dom.style.top =  this.y + 'px';
                 break;
         case 4 : // bottom弹幕有一条消失时把其余弹幕向下移动，顶到边界
-                if( this.y < this.toY ) { 
+                if( this.y < this.toY ) {
                     // 向下移动
-                    this.y += this.ySpeed;
+                    this.y += this.ySpeed * ( time - this.yLastMove );
+                    this.yLastMove = time;
                     // 检查是否越界
                     if( this.y > this.toY ) this.y = this.toY;
                     // 移动SVG TEXT NODE 
-                    this.node.y( this.y );
-                } 
+                    this.dom.style.top =  this.y + 'px';
+                }
                 break;
         case 5 : // top弹幕和bottom相反
                 if( this.y > this.toY ) { 
-                    // 向下移动
-                    this.y -= this.ySpeed;
+                    // 向上移动
+                    this.y -= this.ySpeed * ( time - this.yLastMove );
+                    this.yLastMove = time;
                     // 检查是否越界
                     if( this.y < this.toY ) this.y = this.toY;
                     // 移动SVG TEXT NODE 
-                    this.node.y( this.y );
+                    this.dom.style.top =  this.y + 'px';
                 } 
                 break;
         case 6 : // 逆向弹幕的水平移动方向与1相反
-                this.x = this.speed * time_passed - this.width; 
-                this.node.move(this.x, this.y); 
+                this.x = this.speed * timePassed - this.width; 
+                this.dom.style.left = this.x + 'px';
+                this.dom.style.top =  this.y + 'px';
                 break;
     }
 }
@@ -144,7 +161,7 @@ DANMAKU.prototype.frame = function( time ) {
  */
 DANMAKU.prototype.remove = function() {
     // 移除SVG TEXT NODE
-    this.node.remove();
+    this.dom.parentNode.removeChild(this.dom);
     // 从弹幕池中移除
     this.removeFromDanmakuLayer();
     // 从正在显示队列中移除
@@ -283,8 +300,8 @@ DANMAKU.parse = function( xmlDoc ) {
 
             // mode=7是特殊弹幕，其他弹幕的格式是统一的
             if( obj.mode < 7 ) {
-                // \n前面是一个全角空格，不然完全空白的行无法显示出来
-                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
+                // \n换成html换行符
+                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n");
             } else {
                 if( obj.mode == 7 ) {
                     try {
@@ -294,7 +311,7 @@ DANMAKU.parse = function( xmlDoc ) {
                         obj.shadow = true;
                         obj.x = adv[0];
                         obj.y = adv[1];
-                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
+                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "\n");
                         if( adv.length >= 7 ) {
                             obj.rZ = adv[5];
                             obj.rY = adv[6];
@@ -330,6 +347,8 @@ DANMAKU.parse = function( xmlDoc ) {
                     }
                 }
             }
+            // bili使用的方块符放在html黑体下显示效果不对，需要换个像一点的
+            if(obj) obj.text = obj.text.replace(/\u25a0/g, "\u2588");
             tlist.push(obj);
         }
     }
@@ -356,7 +375,7 @@ DANMAKU.list = function() {
         // span里显示弹幕时间
         var li = document.createElement('li'),
             span = document.createElement('span'),
-            text = document.createTextNode(danmaku_list[i]['text']);
+            text = document.createTextNode( danmaku_list[i]['text'].replace(/<br>/g, '') );
         
         span.innerHTML = s2t(danmaku_list[i]['stime']);
 
@@ -404,9 +423,10 @@ DANMAKU.insert = function ( danmaku ) {
  * 检查是否有弹幕需要加入弹幕池
  * 
  */
-DANMAKU.update = function( time ) {
+DANMAKU.update = function() {
     // 用本地变量引用全局变量
-    var len = DANMAKU_LIST.length,
+    var time = TIME,
+        len = DANMAKU_LIST.length,
         pos = DANMAKU_LAST_POS,
         lt  = DANMAKU_LAST_TIME;
 
@@ -436,11 +456,11 @@ DANMAKU.update = function( time ) {
  * 每帧的运算和显示
  * 
  */
-DANMAKU.frame = function( time ) {
+DANMAKU.frame = function() {
     // 遍历弹幕池
     // 执行效率好像有点低，必须动态获取RUNNING_LIST的长度..
     for( var i = 0; i < RUNNING_LIST.length; i++ ) {
             // 调用每个弹幕实例的运算函数，自己去计算下一帧的状态
-            RUNNING_LIST[i].frame( time );
+            RUNNING_LIST[i].frame();
     }
 }

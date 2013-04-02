@@ -52,7 +52,24 @@ video{
 	z-index: 999;
 }
 #stage{
-	position: relative;
+	cursor: pointer;
+	overflow: hidden;
+}
+.danmaku{
+	color: #fff;
+	cursor: text;
+	font-size: 25px;
+	letter-spacing: 0;
+	line-height: 115.9%;
+	text-shadow: -1px 0 0 rgba(0, 0, 0, .75), 0 -1px 0 rgba(0, 0, 0, .75), 0 1px 0 rgba(0, 0, 0, .75), 1px 0 0 rgba(0, 0, 0, .75), 0 0 3px #000;
+	position: absolute;
+}
+.scrollDanmaku{
+}
+.bottomDanmaku{
+	margin-top: -10px;
+}
+.topDanmaku{
 }
 svg{
 	cursor: pointer;
