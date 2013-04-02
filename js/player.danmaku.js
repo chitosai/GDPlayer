@@ -98,7 +98,8 @@ DANMAKU.prototype.frame = function( time ) {
     switch( this.mode ) {
         case 1 : // 水平移动
                 this.x = (stage.width + this.width) / dlt * (dlt - time_passed) - this.width; 
-                this.node.move(this.x, this.y); break;
+                this.node.move(this.x, this.y); 
+                break;
         case 4 : // bottom弹幕有一条消失时把其余弹幕向下移动，顶到边界
                 if( this.y < this.toY ) { 
                     // 向下移动
@@ -107,7 +108,18 @@ DANMAKU.prototype.frame = function( time ) {
                     if( this.y > this.toY ) this.y = this.toY;
                     // 移动SVG TEXT NODE 
                     this.node.y( this.y );
-                } break;
+                } 
+                break;
+        case 5 : // top弹幕和bottom相反
+                if( this.y > this.toY ) { 
+                    // 向下移动
+                    this.y -= this.ySpeed;
+                    // 检查是否越界
+                    if( this.y < this.toY ) this.y = this.toY;
+                    // 移动SVG TEXT NODE 
+                    this.node.y( this.y );
+                } 
+                break;
     }
 }
 
