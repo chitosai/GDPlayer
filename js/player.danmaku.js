@@ -63,13 +63,20 @@ var DANMAKU = function( opt, time ) {
  */
 DANMAKU.prototype.setPosition = function() {
     this.height = parseInt(this.node.node.getBBox().height);
-    // 顶部/底部弹幕直接全屏宽，其他的按字数计算长度
-    if( this.mode == 4 || this.mode == 5 ) {
-        this.width = stage.width;
-        this.x = (stage.width - this.node.node.getBBox().width)/2;
-    } else {
-        this.width = parseInt(this.node.node.getBBox().width);
-        this.x = stage.width;
+    this.width = parseInt(this.node.node.getBBox().width);
+    this.speed = (stage.width + this.width) / GLOBAL_CONFIG.danmaku_life_time;
+    // 根据情况来
+    switch( this.mode ) {
+        case 1 : // 正向滚动弹幕初始时放在屏幕右侧以外
+                this.x = stage.width;
+                break;
+        case 4 :
+        case 5 : // 顶部/底部固定弹幕居中
+                this.x = (stage.width - this.width)/2;
+                break;
+        case 6 : // 逆向弹幕放在屏幕左侧以外
+                this.x = -this.width;
+                break;
     }
 
     // 为这条弹幕分配Y轴坐标
@@ -86,18 +93,17 @@ DANMAKU.prototype.setPosition = function() {
  *
  */
 DANMAKU.prototype.frame = function( time ) {
-    var time_passed = time - this.ctime,
-        dlt = GLOBAL_CONFIG.danmaku_life_time;
+    var time_passed = time - this.ctime;
     // 检查弹幕生存时间是否结束
     // 因为弹幕并不是都会移动的，所以只有用生存时间来检测越界
-    if( time_passed > dlt ) {
+    if( time_passed > GLOBAL_CONFIG.danmaku_life_time ) {
         this.remove();
     }
 
     // 根据弹幕类别来决定action
     switch( this.mode ) {
         case 1 : // 水平移动
-                this.x = (stage.width + this.width) / dlt * (dlt - time_passed) - this.width; 
+                this.x = this.speed * (GLOBAL_CONFIG.danmaku_life_time - time_passed) - this.width; 
                 this.node.move(this.x, this.y); 
                 break;
         case 4 : // bottom弹幕有一条消失时把其余弹幕向下移动，顶到边界
@@ -119,6 +125,10 @@ DANMAKU.prototype.frame = function( time ) {
                     // 移动SVG TEXT NODE 
                     this.node.y( this.y );
                 } 
+                break;
+        case 6 : // 逆向弹幕的水平移动方向与1相反
+                this.x = this.speed * time_passed - this.width; 
+                this.node.move(this.x, this.y); 
                 break;
     }
 }
