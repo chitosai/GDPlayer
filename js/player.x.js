@@ -4,6 +4,7 @@ var GLOBAL_CONFIG = {
     'update_delay'      : 100,  // 更新弹幕池的间隔
     'fps'               : 30,   // 渲染帧数
     'danmaku_life_time' : 5000, // 弹幕显示时间
+    'opacity'           : 1,    // 全局弹幕透明度
 };
 
 function init() {

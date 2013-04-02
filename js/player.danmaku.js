@@ -22,7 +22,7 @@ var DANMAKU = function( opt, time ) {
     this.mode    = opt['mode'];
     this.date    = opt['date'];
     this.hash    = opt['hash'];
-    this.opacity = opt['opacity'] ? opt['opacity'] : 1;
+    this.opacity = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
     this.font    = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
     this.ctime   = time;
 
@@ -77,6 +77,7 @@ DANMAKU.prototype.setPosition = function() {
         case 6 : // 逆向弹幕放在屏幕左侧以外
                 this.x = -this.width;
                 break;
+
     }
 
     // 为这条弹幕分配Y轴坐标
@@ -276,17 +277,20 @@ DANMAKU.parse = function( xmlDoc ) {
             obj.hash = opt[6];
             obj.border = false;
 
-            // mode=7是特殊弹幕
+            // mode=7是特殊弹幕，其他弹幕的格式是统一的
             if( obj.mode < 7 ) {
                 // \n前面是一个全角空格，不然完全空白的行无法显示出来
                 obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
             } else {
                 if( obj.mode == 7 ) {
                     try {
-                        adv = JSON.parse(text);
+                        // bili的高级弹幕里会带tab，要把这个去掉不然没法解析
+                        text = text.replace(/\t/g, "\\t");
+                        var adv = JSON.parse(text);
+                        obj.shadow = true;
                         obj.x = adv[0];
                         obj.y = adv[1];
-                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "\n");
+                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
                         obj.rZ = 0;
                         obj.rY = 0;
                         if( adv.length >= 7 ) {
@@ -294,7 +298,7 @@ DANMAKU.parse = function( xmlDoc ) {
                             obj.rY = adv[6];
                         }
                         obj.movable = false;
-                        if( adv.length >= 11 ){
+                        if( adv.length >= 11 ) {
                             obj.movable = true;
                             obj.toX = adv[7];
                             obj.toY = adv[8];
@@ -302,22 +306,29 @@ DANMAKU.parse = function( xmlDoc ) {
                             obj.moveDelay = 0;
                             if( adv[9] != '' )
                                 obj.moveDuration = adv[9];
-                            if( adv[10] != "" )
+                            if( adv[10] != '' )
                                 obj.moveDelay = adv[10];
+                            if( adv.length > 11 ) {
+                                obj.shadow = adv[11] == 'false' ? false : true;
+                                if( adv[12] != null )
+                                    obj.font = adv[12];
+                            }
                         }
                         obj.duration = 2500;
-                        if( adv[3] < 12 && adv[3] != 1 ){
+                        if( adv[3] < 12 ) {
                             obj.duration = adv[3] * 1000;
                         }
-                        obj.alphaFrom = 1;
-                        obj.alphaTo = 1;
+                        obj.opacityFrom = 1;
+                        obj.opacityTo = 1;
                         var tmp = adv[2].split('-');
-                        if( tmp != null && tmp.length > 1 ){
+                        if( tmp != null && tmp.length > 1 ) {
                             obj.alphaFrom = parseFloat(tmp[0]);
                             obj.alphaTo = parseFloat(tmp[1]);
                         }
                     } catch(e) {
-                        console.log('无法解析特殊弹幕的JSON');
+                        // 唔……解析不出来
+                        console.log('无法解析高级弹幕的JSON:', e, e.message);
+                        console.log(text);
                     }
                 }
             }
