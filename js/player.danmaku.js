@@ -36,6 +36,12 @@ var DANMAKU = function( opt, time ) {
     this.toY = 0;
     this.ySpeed = 8;
 
+    // 高级弹幕专用
+    // 如果有rotate效果
+    // if( (opt.rY && opt.rY != 0) || (opt.rZ && opt.rZ != 0) ) {
+    //     cmt.style.transform = "rotateY(" + (data.rY > 180 && data.rY < 270?(0-data.rY):data.rY) + "deg) rotateZ(" + (data.rZ > 180 && data.rZ < 270?(0-data.rZ):data.rZ) + "deg)";
+    // }
+
     // 生成SVG TEXT NODE
     this.node = stage.svg
                      .text(this.text)
@@ -69,23 +75,21 @@ DANMAKU.prototype.setPosition = function() {
     switch( this.mode ) {
         case 1 : // 正向滚动弹幕初始时放在屏幕右侧以外
                 this.x = stage.width;
+                this.ScrollDanmaku( DANMAKU_POOL['scroll'], 0 );
                 break;
-        case 4 :
-        case 5 : // 顶部/底部固定弹幕居中
+        case 4 : // 顶部/底部固定弹幕居中
                 this.x = (stage.width - this.width)/2;
+                this.BottomDanmaku( DANMAKU_POOL['bottom'], 0 );
+        case 5 : 
+                this.x = (stage.width - this.width)/2;
+                this.TopDanmaku( DANMAKU_POOL['top'], 0 );
                 break;
         case 6 : // 逆向弹幕放在屏幕左侧以外
                 this.x = -this.width;
+                this.ReverseDanmaku( DANMAKU_POOL['reverse'], 0 );
                 break;
-
-    }
-
-    // 为这条弹幕分配Y轴坐标
-    switch( this.mode ) {
-        case 1 : ret = this.ScrollDanmaku( DANMAKU_POOL['scroll'], 0 ); break;
-        case 4 : ret = this.BottomDanmaku( DANMAKU_POOL['bottom'], 0 ); break;
-        case 5 : ret = this.TopDanmaku( DANMAKU_POOL['top'], 0 ); break;
-        case 6 : ret = this.ReverseDanmaku( DANMAKU_POOL['reverse'], 0 ); break;
+        case 7 : // 高级弹幕，这个是最复杂的情况...
+                break;
     }
 }
 
@@ -291,8 +295,6 @@ DANMAKU.parse = function( xmlDoc ) {
                         obj.x = adv[0];
                         obj.y = adv[1];
                         obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "　\n");
-                        obj.rZ = 0;
-                        obj.rY = 0;
                         if( adv.length >= 7 ) {
                             obj.rZ = adv[5];
                             obj.rY = adv[6];
@@ -302,8 +304,6 @@ DANMAKU.parse = function( xmlDoc ) {
                             obj.movable = true;
                             obj.toX = adv[7];
                             obj.toY = adv[8];
-                            obj.moveDuration = 500;
-                            obj.moveDelay = 0;
                             if( adv[9] != '' )
                                 obj.moveDuration = adv[9];
                             if( adv[10] != '' )
@@ -318,12 +318,10 @@ DANMAKU.parse = function( xmlDoc ) {
                         if( adv[3] < 12 ) {
                             obj.duration = adv[3] * 1000;
                         }
-                        obj.opacityFrom = 1;
-                        obj.opacityTo = 1;
                         var tmp = adv[2].split('-');
                         if( tmp != null && tmp.length > 1 ) {
-                            obj.alphaFrom = parseFloat(tmp[0]);
-                            obj.alphaTo = parseFloat(tmp[1]);
+                            obj.opacityFrom = parseFloat(tmp[0]);
+                            obj.opacityTo = parseFloat(tmp[1]);
                         }
                     } catch(e) {
                         // 唔……解析不出来
