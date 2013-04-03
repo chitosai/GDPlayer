@@ -15,16 +15,17 @@ var DANMAKU_POOL = {'scroll': [], 'top': [], 'bottom': [], 'reverse': []}; // �
  */
 var DANMAKU = function( opt, time ) {
     // 由设置传入的参数
-    this.text    = opt['text'];
-    this.stime   = opt['stime'];
-    this.size    = opt['size'];
-    this.color   = opt['color'];
-    this.mode    = opt['mode'];
-    this.date    = opt['date'];
-    this.hash    = opt['hash'];
-    this.opacity = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
-    this.font    = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
-    this.ctime   = time;
+    this.text        = opt['text'];
+    this.stime       = opt['stime'];
+    this.size        = opt['size'];
+    this.color       = opt['color'];
+    this.mode        = opt['mode'];
+    this.date        = opt['date'];
+    this.hash        = opt['hash'];
+    this.opacity     = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
+    this.font        = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
+    this.lt          = opt['lifeTime'] ? opt['lifeTime'] : GLOBAL_CONFIG.danmaku_life_time;
+    this.ctime       = time;
 
     // 生成文本节点！
     this.dom = document.createElement('div');
@@ -47,10 +48,30 @@ var DANMAKU = function( opt, time ) {
     this.dom.className = this.className;
 
     // 高级弹幕专用
-    // 如果有rotate效果
-    // if( (opt.rY && opt.rY != 0) || (opt.rZ && opt.rZ != 0) ) {
-    //     cmt.style.transform = "rotateY(" + (data.rY > 180 && data.rY < 270?(0-data.rY):data.rY) + "deg) rotateZ(" + (data.rZ > 180 && data.rZ < 270?(0-data.rZ):data.rZ) + "deg)";
-    // }
+    if( this.mode >= 7 ) {
+        this.opacityFrom = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
+        this.opacityTo   = opt['opacityTo'] ? opt['opacityTo'] : GLOBAL_CONFIG.opacity;
+        this.isMove      = opt['isMove'];
+        this.moveDuration = opt['moveDuration'];
+        this.moveDelay = opt['moveDelay'];
+        this.toX = opt['toX'];
+        this.toY = opt['toY'];
+        // 特殊弹幕自带坐标，不需要setPosition来定位！
+        this.x = opt['x'];
+        this.y = opt['y'];
+
+        // 如果有rotate效果
+        if(  opt.rY != 0 || opt.rZ != 0 ) {
+            this.dom.style.transformOrigin = "0% 0%";
+            this.dom.style.webkitTransformOrigin = "0% 0%";
+            this.dom.style.transform = "rotateY(" + opt.rY  + "deg) rotateZ(" + opt.rZ + "deg)";
+            this.dom.style.webkitTransform = "rotateY(" + opt.rY + "deg) rotateZ(" + opt.rZ + "deg)";
+        }
+        // 如果有阴影设置
+        if( typeof opt['shadow'] == 'boolean' && !opt['shadow'] ) {
+            this.dom.style.textShadow = 'none';
+        }
+    }
 
     // 插入文本节点
     stage.dom.appendChild(this.dom);
@@ -62,7 +83,7 @@ var DANMAKU = function( opt, time ) {
     this.dom.style.width = this.width + 'px';
     this.dom.style.height = this.height + 'px';
 
-    this.speed = (stage.width + this.width) / GLOBAL_CONFIG.danmaku_life_time;
+    this.speed = (stage.width + this.width) / this.lt;
 
     // 为这条弹幕分配坐标
     this.setPosition();
@@ -97,7 +118,7 @@ DANMAKU.prototype.setPosition = function() {
                 this.x = -this.width;
                 this.ReverseDanmaku( DANMAKU_POOL['reverse'], 0 );
                 break;
-        case 7 : // 高级弹幕，这个是最复杂的情况...
+        case 7 : // 高级弹幕，自带坐标，不需要我们来计算
                 break;
     }
     // 将弹幕放置到初始位置上
@@ -114,14 +135,14 @@ DANMAKU.prototype.frame = function() {
         timePassed = time - this.ctime;
     // 检查弹幕生存时间是否结束
     // 因为弹幕并不是都会移动的，所以只有用生存时间来检测越界
-    if( timePassed > GLOBAL_CONFIG.danmaku_life_time ) {
+    if( timePassed > this.lt ) {
         this.remove();
     }
 
     // 根据弹幕类别来决定action
     switch( this.mode ) {
         case 1 : // 水平移动
-                this.x = this.speed * (GLOBAL_CONFIG.danmaku_life_time - timePassed) - this.width; 
+                this.x = this.speed * (this.lt - timePassed) - this.width; 
                 this.dom.style.left = this.x + 'px';
                 this.dom.style.top =  this.y + 'px';
                 break;
@@ -151,6 +172,17 @@ DANMAKU.prototype.frame = function() {
                 this.x = this.speed * timePassed - this.width; 
                 this.dom.style.left = this.x + 'px';
                 this.dom.style.top =  this.y + 'px';
+                break;
+        case 7 : // 高级弹幕
+                if( this.opacityTo != this.opacityFrom ) {
+                    this.dom.style.opacity = (this.opacityTo - this.opacityFrom ) * ( timePassed / this.lt ) + this.opacityFrom;
+                }
+                if( this.isMove ) {
+                    // 里面套的max/min是为了保证移动不会超出设定位置
+                    // 以及高级弹幕因为不存在两次移动的情况，所以x/y不用更新，把计算值直接赋给dom.style就行了
+                    this.dom.style.top = ((this.toY - this.y) * (Math.min(Math.max( timePassed - this.moveDelay, 0), this.moveDuration) / this.moveDuration) + parseInt(this.y)) + "px";
+                    this.dom.style.left = ((this.toX - this.x) * (Math.min(Math.max( timePassed - this.moveDelay, 0), this.moveDuration) / this.moveDuration) + parseInt(this.x)) + "px";
+                }
                 break;
     }
 }
@@ -300,8 +332,8 @@ DANMAKU.parse = function( xmlDoc ) {
 
             // mode=7是特殊弹幕，其他弹幕的格式是统一的
             if( obj.mode < 7 ) {
-                // \n换成html换行符
-                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n");
+                // 把ascii换成html标签
+                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n").replace(' ', '&nbsp;');
             } else {
                 if( obj.mode == 7 ) {
                     try {
@@ -311,14 +343,14 @@ DANMAKU.parse = function( xmlDoc ) {
                         obj.shadow = true;
                         obj.x = adv[0];
                         obj.y = adv[1];
-                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "\n");
+                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n").replace(' ', '&nbsp;');
                         if( adv.length >= 7 ) {
                             obj.rZ = adv[5];
                             obj.rY = adv[6];
                         }
-                        obj.movable = false;
+                        obj.isMove = false;
                         if( adv.length >= 11 ) {
-                            obj.movable = true;
+                            obj.isMove = true;
                             obj.toX = adv[7];
                             obj.toY = adv[8];
                             if( adv[9] != '' )
@@ -331,14 +363,18 @@ DANMAKU.parse = function( xmlDoc ) {
                                     obj.font = adv[12];
                             }
                         }
-                        obj.duration = 2500;
                         if( adv[3] < 12 ) {
-                            obj.duration = adv[3] * 1000;
+                            obj.lifeTime = adv[3] * 1000;
+                        } else {
+                            obj.lifeTime = 2500;
                         }
                         var tmp = adv[2].split('-');
                         if( tmp != null && tmp.length > 1 ) {
                             obj.opacityFrom = parseFloat(tmp[0]);
                             obj.opacityTo = parseFloat(tmp[1]);
+                        } else {
+                            obj.opacityFrom = 1;
+                            obj.opacityTo = 1;
                         }
                     } catch(e) {
                         // 唔……解析不出来
@@ -375,7 +411,7 @@ DANMAKU.list = function() {
         // span里显示弹幕时间
         var li = document.createElement('li'),
             span = document.createElement('span'),
-            text = document.createTextNode( danmaku_list[i]['text'].replace(/<br>/g, '') );
+            text = document.createTextNode( danmaku_list[i]['text'].replace(/<br>/g, '').replace('&nbsp;', ' ') );
         
         span.innerHTML = s2t(danmaku_list[i]['stime']);
 

@@ -165,6 +165,7 @@ var VIDEO = function( video, controller ) {
             // 当前弹幕池中的弹幕更新
             DANMAKU.frame();
         }, 1000/GLOBAL_CONFIG.fps );
+        // 更新当前播放时间专用
         self.timer = setInterval( function() {
             TIME = self.video.currentTime * 1000;
         }, 10);

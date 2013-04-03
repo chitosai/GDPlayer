@@ -216,15 +216,7 @@ DANMAKU.prototype.ReverseDanmakuVCheck = function( y, layer ) {
  *
  */
 DANMAKU.prototype.pushIntoDanmakuLayer = function( array ) {
-    array.binsert( this, function(a,b) {
-        if( a.bottom < b.bottom ) {
-            return -1;
-        } else if ( a.bottom == b.bottom ) {
-            return 0;
-        } else {
-            return 1;
-        }
-    });
+    array.push(this);
 }
 
 /*
@@ -268,7 +260,7 @@ DANMAKU.prototype.removeFromDanmakuLayer = function() {
  *
  */
 getEndTime = function( danmaku ) {
-    return danmaku.stime + GLOBAL_CONFIG.danmaku_life_time;
+    return danmaku.stime + danmaku.lt;
 }
 
 /*
