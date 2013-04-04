@@ -13,6 +13,8 @@ function init() {
 	document.querySelector('video').addEventListener('canplay', function(){
 		// 初始化video控制器
 		video = new VIDEO( this, document.querySelector('#controller') );
+		// 暂时关掉声音
+		video.video.volume = 0;
 		// 初始化弹幕池
 		stage = new STAGE( document.querySelector('#stage'), video );
 

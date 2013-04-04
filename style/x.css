@@ -60,28 +60,22 @@ video{
 	cursor: text;
 	font-size: 25px;
 	letter-spacing: 0;
-	line-height: 115.9%;
+	line-height: 100%;
 	text-shadow: -1px 0 0 rgba(0, 0, 0, .75), 0 -1px 0 rgba(0, 0, 0, .75), 0 1px 0 rgba(0, 0, 0, .75), 1px 0 0 rgba(0, 0, 0, .75), 0 0 3px #000;
 	position: absolute;
 }
 .scrollDanmaku{
+	padding-top: 3.5px;
 }
 .bottomDanmaku{
-	margin-top: -10px;
+	padding-top: 3.5px;
 }
 .topDanmaku{
 }
-svg{
-	cursor: pointer;
+.danmaku.debug:hover{
+	color: #f90 !important;
 }
-text{
-	cursor: text;
-	letter-spacing: 0;
-	text-shadow: 1px 1px 2px #000;
-}
-text:hover{
-	fill: #f90;
-}
+
 #controller{
 	background: #ccc;
 	width: 100%;

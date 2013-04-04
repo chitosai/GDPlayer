@@ -15,6 +15,7 @@ var DANMAKU_POOL = {'scroll': [], 'top': [], 'bottom': [], 'reverse': []}; // �
  */
 var DANMAKU = function( opt, time ) {
     // 由设置传入的参数
+    this.id          = opt['id'];
     this.text        = opt['text'];
     this.stime       = opt['stime'];
     this.size        = opt['size'];
@@ -22,9 +23,9 @@ var DANMAKU = function( opt, time ) {
     this.mode        = opt['mode'];
     this.date        = opt['date'];
     this.hash        = opt['hash'];
-    this.opacity     = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
+    this.opacity     = GLOBAL_CONFIG.opacity;
     this.font        = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
-    this.lt          = opt['lifeTime'] ? opt['lifeTime'] : GLOBAL_CONFIG.danmaku_life_time;
+    this.lt          = GLOBAL_CONFIG.danmaku_life_time;
     this.ctime       = time;
 
     // 生成文本节点！
@@ -38,6 +39,7 @@ var DANMAKU = function( opt, time ) {
 
     // 带上响应的特殊class
     this.className = 'danmaku ';
+    if( GLOBAL_CONFIG.debug ) this.className += 'debug ';
     switch( this.mode ) {
         case 1 :
         case 6 : this.className += 'scrollDanmaku'; break;
@@ -49,26 +51,29 @@ var DANMAKU = function( opt, time ) {
 
     // 高级弹幕专用
     if( this.mode >= 7 ) {
-        this.opacityFrom = opt['opacityFrom'] ? opt['opacityFrom'] : GLOBAL_CONFIG.opacity;
-        this.opacityTo   = opt['opacityTo'] ? opt['opacityTo'] : GLOBAL_CONFIG.opacity;
-        this.isMove      = opt['isMove'];
+        this.opacityFrom  = opt['opacityFrom'];
+        this.opacityTo    = opt['opacityTo'];
+        this.isMove       = opt['isMove'];
         this.moveDuration = opt['moveDuration'];
-        this.moveDelay = opt['moveDelay'];
-        this.toX = opt['toX'];
-        this.toY = opt['toY'];
+        this.moveDelay    = opt['moveDelay'];
+        this.toX          = opt['toX'];
+        this.toY          = opt['toY'];
         // 特殊弹幕自带坐标，不需要setPosition来定位！
-        this.x = opt['x'];
-        this.y = opt['y'];
+        this.x            = opt['x'];
+        this.y            = opt['y'];
+        // 高级弹幕有自带的生存时间，为0时永远显示
+        this.lt = opt['lifeTime'] === 0 ? 999999999 : opt['lifeTime'];
 
         // 如果有rotate效果
-        if(  opt.rY != 0 || opt.rZ != 0 ) {
-            this.dom.style.transformOrigin = "0% 0%";
+        this.rY = opt.rY;
+        this.rZ = opt.rZ;
+        if( opt.rY != 0 || opt.rZ != 0 ) {
             this.dom.style.webkitTransformOrigin = "0% 0%";
-            this.dom.style.transform = "rotateY(" + opt.rY  + "deg) rotateZ(" + opt.rZ + "deg)";
-            this.dom.style.webkitTransform = "rotateY(" + opt.rY + "deg) rotateZ(" + opt.rZ + "deg)";
+            this.dom.style.webkitTransform = "perspective(20px) rotateY(" + opt.rY + "deg) rotateZ(" + opt.rZ + "deg)";
+            this.dom.style.webkitPerspectiveOrigin = "left bottom";
         }
-        // 如果有阴影设置
-        if( typeof opt['shadow'] == 'boolean' && !opt['shadow'] ) {
+        // 如果弹幕君设置了是否描边就根据他的设置来
+        if( opt['stroke'] === false ) {
             this.dom.style.textShadow = 'none';
         }
     }
@@ -83,6 +88,7 @@ var DANMAKU = function( opt, time ) {
     this.dom.style.width = this.width + 'px';
     this.dom.style.height = this.height + 'px';
 
+    // speed其实是scroll弹幕才用得到的，其他模式的弹幕都有自己的定位计算方法
     this.speed = (stage.width + this.width) / this.lt;
 
     // 为这条弹幕分配坐标
@@ -92,7 +98,7 @@ var DANMAKU = function( opt, time ) {
     RUNNING_LIST.push(this);
 
     // 在弹幕列表中给这条弹幕加个激活状态
-    document.querySelector('#d' + this.hash).className = 'active';
+    document.querySelector('#d' + this.id).className = 'active';
 }
 
 /*
@@ -139,6 +145,9 @@ DANMAKU.prototype.frame = function() {
         this.remove();
     }
 
+    // 在DEBUG模式下显示对象属性到DOM上
+    this.displayProperty();
+
     // 根据弹幕类别来决定action
     switch( this.mode ) {
         case 1 : // 水平移动
@@ -175,7 +184,8 @@ DANMAKU.prototype.frame = function() {
                 break;
         case 7 : // 高级弹幕
                 if( this.opacityTo != this.opacityFrom ) {
-                    this.dom.style.opacity = (this.opacityTo - this.opacityFrom ) * ( timePassed / this.lt ) + this.opacityFrom;
+                    this.opacity = ( this.opacityTo - this.opacityFrom ) * ( timePassed / this.lt ) + this.opacityFrom;
+                    this.dom.style.opacity = this.opacity;
                 }
                 if( this.isMove ) {
                     // 里面套的max/min是为了保证移动不会超出设定位置
@@ -199,9 +209,26 @@ DANMAKU.prototype.remove = function() {
     // 从正在显示队列中移除
     RUNNING_LIST.remove(this);
     // 去除弹幕列表中这条弹幕的激活状态
-    document.querySelector('#d' + this.hash).className = '';
+    document.querySelector('#d' + this.id).className = '';
 }
 
+/*
+ * 把一条弹幕的所有属性显示到她的DOM结构上
+ *
+ */
+DANMAKU.prototype.displayProperty = function() {
+    // 仅在DEBUG模式下使用，否则经常更新DOM结构太浪费资源
+    if( !GLOBAL_CONFIG.debug ) return;
+    var self = this,
+        p = '';
+    for( var property in self ) {
+        // 函数、DOM引用和文本内容不用输出
+        if( typeof self[property] == 'function' || typeof self[property] == 'object' || property == 'text' )
+            continue;
+        p += property + ':' + self[property] + ';';
+    }
+    this.dom.setAttribute('propertys', p);
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 // 下面是静态方法
@@ -274,13 +301,21 @@ DANMAKU.load = function( url, callback ) {
                 // 弹幕队列按时间排序
                 DANMAKU_LIST.sort(function(a,b){
                     // 优先根据弹幕显示时间排序
-                    if(a.stime > b.stime) return 2;
-                    else if(a.stime < b.stime) return -2;
+                    if( a.stime > b.stime ) return 1;
+                    else if( a.stime < b.stime ) return -1;
                     // 弹幕时间相同则根据发布时间排序
                     else {
-                        if(a.date > b.date) return 1;
-                        else if(a.date < b.date) return -1;
-                        else return 0;
+                        if( a.date > b.date ) return 1;
+                        else if( a.date < b.date ) return -1;
+                        // 如果时间戳也没有就看有没有弹幕id，有的话用弹幕id来比较先后
+                        else if( a.id != null && b.id != null ) {
+                            if( a.id > b.id ) return 1;
+                            else if( a.id < b.id ) return -1;
+                            else return 0;
+                        } else
+                            return 0;
+                        // 如果date也没有那就返回相同吧...
+                        return 0;
                     }
                 });
             } else {
@@ -312,7 +347,7 @@ DANMAKU.parse = function( xmlDoc ) {
     }
     // 每条弹幕在xml文件中是一个d节点
     var elems = xmlDoc.getElementsByTagName('d');
-    var tlist = [];
+    var d = [];
     // 遍历弹幕列表
     for(var i = 0; i < elems.length; i++ ){
         if( elems[i].getAttribute('p') != null ) {
@@ -321,53 +356,38 @@ DANMAKU.parse = function( xmlDoc ) {
             // p属性上的是弹幕参数，以,分隔
             var opt = elems[i].getAttribute('p').split(',');
             var obj = {};
+            // 弹幕出现时间
             obj.stime = Math.round( parseFloat(opt[0]*1000) );
+            // 字体大小 font-size
             obj.size = parseInt(opt[2]);
+            // 弹幕颜色
             obj.color = "#" + fillRGB( parseInt(opt[3]).toString(16) );
+            // 弹幕类型
             obj.mode = parseInt(opt[1]);
+            // 发送时间戳
             obj.date = parseInt(opt[4]);
+            // 弹幕池，不知做啥的，似乎要自己算
             obj.pool = parseInt(opt[5]);
+            // 弹幕发送者的hash值，用于批量屏蔽弹幕
             obj.hash = opt[6];
-            obj.border = false;
+            // 弹幕id，是这条弹幕的唯一id
+            if( opt[7] != null )
+                obj.id = parseInt(opt[7]);
 
             // mode=7是特殊弹幕，其他弹幕的格式是统一的
             if( obj.mode < 7 ) {
                 // 把ascii换成html标签
-                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n").replace(' ', '&nbsp;');
+                obj.text = text.replace(/(\/n|\\n|\n|\r\n)/g, "<br>").replace(/\s/g, '&nbsp;');
             } else {
                 if( obj.mode == 7 ) {
                     try {
                         // bili的高级弹幕里会带tab，要把这个去掉不然没法解析
                         text = text.replace(/\t/g, "\\t");
                         var adv = JSON.parse(text);
-                        obj.shadow = true;
+                        // 弹幕初始位置
                         obj.x = adv[0];
                         obj.y = adv[1];
-                        obj.text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "<br>\n").replace(' ', '&nbsp;');
-                        if( adv.length >= 7 ) {
-                            obj.rZ = adv[5];
-                            obj.rY = adv[6];
-                        }
-                        obj.isMove = false;
-                        if( adv.length >= 11 ) {
-                            obj.isMove = true;
-                            obj.toX = adv[7];
-                            obj.toY = adv[8];
-                            if( adv[9] != '' )
-                                obj.moveDuration = adv[9];
-                            if( adv[10] != '' )
-                                obj.moveDelay = adv[10];
-                            if( adv.length > 11 ) {
-                                obj.shadow = adv[11] == 'false' ? false : true;
-                                if( adv[12] != null )
-                                    obj.font = adv[12];
-                            }
-                        }
-                        if( adv[3] < 12 ) {
-                            obj.lifeTime = adv[3] * 1000;
-                        } else {
-                            obj.lifeTime = 2500;
-                        }
+                        // 弹幕不透明度变化
                         var tmp = adv[2].split('-');
                         if( tmp != null && tmp.length > 1 ) {
                             obj.opacityFrom = parseFloat(tmp[0]);
@@ -375,6 +395,46 @@ DANMAKU.parse = function( xmlDoc ) {
                         } else {
                             obj.opacityFrom = 1;
                             obj.opacityTo = 1;
+                        }
+                        // 弹幕显示时间
+                        if( adv[3] < 12 ) {
+                            obj.lifeTime = adv[3] * 1000;
+                        } else {
+                            obj.lifeTime = 2500;
+                        }
+                        // 处理弹幕文本
+                        // 换行
+                        var inner_text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "<br>");
+                        // 空格
+                        inner_text = inner_text.replace(/\s/g, '&nbsp;');
+                        obj.text = inner_text;
+                        // 旋转角度
+                        if( adv.length >= 7 ) {
+                            obj.rZ = adv[5];
+                            obj.rY = adv[6];
+                        }
+                        // 移动弹幕
+                        obj.isMove = false;
+                        if( adv.length >= 11 ) {
+                            // 目标位置
+                            obj.toX = adv[7];
+                            obj.toY = adv[8];
+                            // 判断弹幕是否需要移动
+                            if( obj.toX != obj.x || obj.toY != obj.y )
+                                obj.isMove = true;
+                            // 移动时间，弹幕不一定是整个显示周期内都在移动
+                            if( adv[9] != '' )
+                                obj.moveDuration = adv[9];
+                            // 移动开始前的延迟
+                            if( adv[10] != '' )
+                                obj.moveDelay = adv[10];
+                            // 是否描边
+                            if( adv.length > 11 ) {
+                                obj.stroke = adv[11] == 'false' ? false : true;
+                                // 可以指定独特的字体
+                                if( adv[12] != null )
+                                    obj.font = adv[12];
+                            }
                         }
                     } catch(e) {
                         // 唔……解析不出来
@@ -385,10 +445,10 @@ DANMAKU.parse = function( xmlDoc ) {
             }
             // bili使用的方块符放在html黑体下显示效果不对，需要换个像一点的
             if(obj) obj.text = obj.text.replace(/\u25a0/g, "\u2588");
-            tlist.push(obj);
+            d.push(obj);
         }
     }
-    return tlist;
+    return d;
 }
 
 /*
@@ -411,11 +471,11 @@ DANMAKU.list = function() {
         // span里显示弹幕时间
         var li = document.createElement('li'),
             span = document.createElement('span'),
-            text = document.createTextNode( danmaku_list[i]['text'].replace(/<br>/g, '').replace('&nbsp;', ' ') );
+            text = document.createTextNode( danmaku_list[i]['text'].replace(/<br>/g, '').replace(/&nbsp;/g, ' ') );
         
         span.innerHTML = s2t(danmaku_list[i]['stime']);
 
-        li.setAttribute('id', 'd' + danmaku_list[i]['hash']);
+        li.setAttribute('id', 'd' + danmaku_list[i]['id']);
         li.appendChild(span);
         li.appendChild(text);
         ul.appendChild(li);
