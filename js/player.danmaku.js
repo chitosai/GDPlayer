@@ -52,26 +52,28 @@ var DANMAKU = function( opt, time ) {
 
     // 高级弹幕专用
     if( this.mode >= 7 ) {
-        this.opacityFrom  = opt['opacityFrom'];
-        this.opacityTo    = opt['opacityTo'];
-        this.isMove       = opt['isMove'];
-        this.moveDuration = opt['moveDuration'];
-        this.moveDelay    = opt['moveDelay'];
-        this.toX          = opt['toX'];
-        this.toY          = opt['toY'];
+        this.opacityFrom       = opt['opacityFrom'];
+        this.opacityTo         = opt['opacityTo'];
+        this.opacity           = this.opacityFrom;
+        // 重新给DOM节点赋一次opacity
+        this.dom.style.opacity = this.opacity;
+        this.isMove            = opt['isMove'];
+        this.moveDuration      = opt['moveDuration'];
+        this.moveDelay         = opt['moveDelay'];
+        this.toX               = opt['toX'];
+        this.toY               = opt['toY'];
         // 特殊弹幕自带坐标，不需要setPosition来定位！
-        this.x            = opt['x'];
-        this.y            = opt['y'];
+        this.x                 = opt['x'];
+        this.y                 = opt['y'];
         // 高级弹幕有自带的生存时间，为0时永远显示
-        this.lt = opt['lifeTime'] === 0 ? 999999999 : opt['lifeTime'];
+        this.lt                = opt['lifeTime'] === 0 ? 999999999 : opt['lifeTime'];
 
         // 如果有rotate效果
         this.rY = opt.rY;
         this.rZ = opt.rZ;
         if( opt.rY != 0 || opt.rZ != 0 ) {
             this.dom.style.webkitTransformOrigin = "0% 0%";
-            this.dom.style.webkitTransform = "perspective(20px) rotateY(" + opt.rY + "deg) rotateZ(" + opt.rZ + "deg)";
-            this.dom.style.webkitPerspectiveOrigin = "left bottom";
+            this.dom.style.webkitTransform = "rotateY(" + opt.rY + "deg) rotateZ(" + opt.rZ + "deg)";
         }
         // 如果弹幕君设置了是否描边就根据他的设置来
         if( opt['stroke'] === false ) {

@@ -54,10 +54,13 @@ video{
 #stage{
 	cursor: pointer;
 	overflow: hidden;
+	-webkit-perspective: 100;
+	-webkit-perspective-origin: top right;
 }
 .danmaku{
 	color: #fff;
 	cursor: text;
+	display: block;
 	font-size: 25px;
 	letter-spacing: 0;
 	line-height: 100%;
@@ -67,12 +70,18 @@ video{
 	-webkit-text-size-adjust: none;
 }
 .scrollDanmaku{
+	white-space: nowrap;
 	padding-top: 3.5px;
 }
 .bottomDanmaku{
+	text-align: center;
 	padding-top: 3.5px;
 }
 .topDanmaku{
+	text-align: center;
+}
+.specialDanmaku{
+	-webkit-transform-style: preserve-3d;
 }
 .danmaku.debug:hover{
 	color: #f90 !important;
