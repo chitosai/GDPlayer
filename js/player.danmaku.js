@@ -14,6 +14,7 @@ var DANMAKU_POOL = {'scroll': [], 'top': [], 'bottom': [], 'reverse': []}; // �
  *
  */
 var DANMAKU = function( opt, time ) {
+    var self = this;
     // 由设置传入的参数
     this.id          = opt['id'];
     this.text        = opt['text'];
@@ -93,6 +94,11 @@ var DANMAKU = function( opt, time ) {
 
     // 为这条弹幕分配坐标
     this.setPosition();
+    // 放到初始位置上之后再加上transition效果，否则从(0,0)移动到初始位置也会显示出来
+    // setTimeout(function(){
+    //     self.dom.style.transition = 'all ' + 1 / GLOBAL_CONFIG.fps + 's linear';
+    // }, 100);
+    
 
     // 加入RUNNING_LIST
     RUNNING_LIST.push(this);
@@ -405,6 +411,8 @@ DANMAKU.parse = function( xmlDoc ) {
                         // 处理弹幕文本
                         // 换行
                         var inner_text = adv[4].replace(/(\/n|\\n|\n|\r\n)/g, "<br>");
+                        // 全角空格
+                        inner_text = inner_text.replace(/　/g, '&nbsp;&nbsp;');
                         // 空格
                         inner_text = inner_text.replace(/\s/g, '&nbsp;');
                         obj.text = inner_text;
@@ -443,7 +451,7 @@ DANMAKU.parse = function( xmlDoc ) {
                     }
                 }
             }
-            // bili使用的方块符放在html黑体下显示效果不对，需要换个像一点的
+            // ■这种方块好像效果不大好，█相对来说会好一些
             if(obj) obj.text = obj.text.replace(/\u25a0/g, "\u2588");
             d.push(obj);
         }
