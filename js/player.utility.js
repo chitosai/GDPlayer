@@ -137,6 +137,7 @@ var VIDEO = function( video, controller ) {
     // 保存对DOM结构的引用
     this.video = video;
     this.controller = controller.childNodes[1];
+    this.playButton = document.querySelector('#play-button');
 
     // 变量
     this.paused = true;
@@ -217,10 +218,14 @@ var VIDEO = function( video, controller ) {
         // 让进度条继续前进
         self.controller.style.animationPlayState = 'running';
         self.controller.style.webkitAnimationPlayState = 'running';
+        // 隐藏播放按钮
+        self.playButton.className = '';
     });
     // 播放完毕
     this.video.addEventListener('ended', function() {
         self.stopTimer();
+        // 显示播放按钮
+        self.playButton.className = 'paused';
     });
     // 用户暂停
     this.video.addEventListener('pause', function() {
@@ -228,5 +233,7 @@ var VIDEO = function( video, controller ) {
         // 让进度条停下来
         self.controller.style.animationPlayState = 'paused';
         self.controller.style.webkitAnimationPlayState = 'paused';
+        // 显示播放按钮
+        self.playButton.className = 'paused';
     });
 }

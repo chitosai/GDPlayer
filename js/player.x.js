@@ -21,7 +21,7 @@ function init() {
 	    // 绑定点击弹幕舞台切换播放状态
 	    document.querySelector('#stage').addEventListener( 'click', function(e) {
 	        // 判断点击来自哪里
-	        // 如果直接点击svg或播放按钮可以切换播放状态
+	        // 如果直接点击stage或播放按钮可以切换播放状态
 	        if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
 	            video.togglePlay();
 	        // 如果点击在文字上可能是想复制之类的
@@ -29,8 +29,12 @@ function init() {
 	            return false;
 	        // 不应该还有其他元素... 
 	        else 
-	            DEBUG(e.target.nodeName);
+	            console.log(e.target.nodeName);
 	    });
+
+	    // 更换loading图标为播放图标
+	    document.querySelector('#loading').style.display = 'none';
+	    document.querySelector('#play-button').className = 'initial';
 	});
 
 	// 预读弹幕

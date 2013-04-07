@@ -14,9 +14,9 @@
             <select name="" id="danmaku-source-list">
                 <option value="local/av364356.xml">av364356</option>
                 <option value="local/av271.xml">av271</option>
-                <option value="local/av122647.xml">av122647</option>
+                <option value="local/av122647.xml" selected>av122647</option>
                 <option value="local/test-x.xml">收集</option>
-                <option value="local/test.xml" selected>测试</option>
+                <option value="local/test.xml">测试</option>
             </select>
         </div>
         
@@ -24,6 +24,7 @@
             <div id="player">
                 <!-- 弹幕舞台 -->
                 <div id="stage">
+                    <img src="style/loading.gif" alt="" id="loading">
                     <div id="play-button">▶</div>
                 </div>
                 <!-- video -->
@@ -45,7 +46,7 @@
                     <option value="7">特殊弹幕</option>
                 </select>
                 <!-- 弹幕文本 -->
-                <input type="text" id="danmaku-text">
+                <input type="text" id="danmaku-text" disabled>
                 <input type="submit" value="发送" id="do-send-danmaku">
             </form>
         </div>

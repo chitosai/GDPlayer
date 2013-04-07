@@ -39,17 +39,37 @@ body{
 video{
 	background: #000;
 }
-#play-button{
-	background: rgba(0, 0, 0, .75);
-	border-radius: 2px;
-	color: #fff;
-	cursor: pointer;
-	font-size: 24px;
-	padding: 0 10px 5px;
+#loading{
 	position: absolute;
 	top: 174px;
 	left: 252px;
+}
+#play-button{
+	background: #fff;
+	border-radius: 2px;
+	color: #555;
+	cursor: pointer;
+	font-size: 24px;
+	padding: 0 10px 5px;
+	opacity: 0;
+	position: absolute;
+	top: 390px;
+	left: 20px;
 	z-index: 999;
+	transition: all .3s ease;
+}
+#play-button:hover{
+	color: #69f;
+}
+#play-button.paused{
+	top: 330px;
+	left: 20px;
+	opacity: 1;
+}
+#play-button.initial{
+	top: 174px;
+	left: 252px;
+	opacity: 1;
 }
 #stage{
 	cursor: pointer;
