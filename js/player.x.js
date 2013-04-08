@@ -35,6 +35,10 @@ function init() {
 	    // 更换loading图标为播放图标
 	    document.querySelector('#loading').style.display = 'none';
 	    document.querySelector('#play-button').className = 'initial';
+	    // 为了不出现播放按钮从左下角移动进来的动画，等300ms后再加transition
+	    setTimeout(function(){
+	    	document.querySelector('#play-button').style.transition = 'all .3s ease';
+	    }, 300);
 	});
 
 	// 预读弹幕

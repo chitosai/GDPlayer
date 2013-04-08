@@ -35,6 +35,7 @@ body{
 	border-radius: 2px;
 	box-shadow: 0 0 15px rgba(255, 255, 255, .65);
 	padding: 3px;
+	position: relative;
 }
 video{
 	background: #000;
@@ -56,7 +57,6 @@ video{
 	top: 390px;
 	left: 20px;
 	z-index: 999;
-	transition: all .3s ease;
 }
 #play-button:hover{
 	color: #69f;
