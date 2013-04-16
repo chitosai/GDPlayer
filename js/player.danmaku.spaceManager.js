@@ -18,7 +18,7 @@ DANMAKU.prototype.ScrollDanmaku = function( pool, layer_index ) {
     // 如果有弹幕，则永远从y=0的位置开始检测，确保屏幕空间利用率最大
     // 或者当弹幕高度大于舞台高度的时候，直接丢在y=0的位置
     if( layer.length == 0 || this.ScrollDanmakuVCheck(0, layer) || this.height > stage.height ) {
-        this.pushIntoDanmakuLayer( layer );
+        this.bInsertIntoDanmakuLayer( layer );
         this.y = 0;
         this.bottom = this.height;
         this.layer = layer;
@@ -33,7 +33,7 @@ DANMAKU.prototype.ScrollDanmaku = function( pool, layer_index ) {
         }
         // 普通的情况
         if( this.ScrollDanmakuVCheck(y, layer) ) {
-            this.pushIntoDanmakuLayer( layer );
+            this.bInsertIntoDanmakuLayer( layer );
             this.y = y;
             this.bottom = y + this.height;
             this.layer = layer;
@@ -157,7 +157,7 @@ DANMAKU.prototype.ReverseDanmaku = function( pool, layer_index ) {
     // 如果有弹幕，则永远从y=0的位置开始检测，确保屏幕空间利用率最大
     // 或者当弹幕高度大于舞台高度的时候，直接丢在y=0的位置
     if( layer.length == 0 || this.ReverseDanmakuVCheck(0, layer) || this.height > stage.height ) {
-        this.pushIntoDanmakuLayer( layer );
+        this.bInsertIntoDanmakuLayer( layer );
         this.y = 0;
         this.bottom = this.height;
         this.layer = layer;
@@ -172,7 +172,7 @@ DANMAKU.prototype.ReverseDanmaku = function( pool, layer_index ) {
         }
         // 普通的情况
         if( this.ReverseDanmakuVCheck(y, layer) ) {
-            this.pushIntoDanmakuLayer( layer );
+            this.bInsertIntoDanmakuLayer( layer );
             this.y = y;
             this.bottom = y + this.height;
             this.layer = layer;
@@ -212,11 +212,19 @@ DANMAKU.prototype.ReverseDanmakuVCheck = function( y, layer ) {
 // 下面是所有类型的弹幕都可能用到的方法
 
 /*
- * 将一条弹幕二分插入弹幕层
+ * 将一条弹幕插入弹幕层，因为现在发现总是根据
  *
  */
-DANMAKU.prototype.pushIntoDanmakuLayer = function( array ) {
-    array.push(this);
+DANMAKU.prototype.bInsertIntoDanmakuLayer = function( array ) {
+    array.binsert( this, function(a, b) {
+        if( a.bottom < b.bottom ) {
+            return -1;
+        } else if ( a.bottom == b.bottom ) {
+            return 0;
+        } else {
+            return 1;
+        }
+    });
 }
 
 /*

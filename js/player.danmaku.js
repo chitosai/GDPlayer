@@ -25,7 +25,7 @@ var DANMAKU = function( opt, time ) {
     this.date        = opt['date'];
     this.hash        = opt['hash'];
     this.opacity     = GLOBAL_CONFIG.opacity;
-    this.font        = opt['font'] ? opt['font'] : 'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace';
+    this.font        = GLOBAL_CONFIG.font;
     this.lt          = GLOBAL_CONFIG.danmaku_life_time;
     this.ctime       = time;
 
@@ -67,6 +67,11 @@ var DANMAKU = function( opt, time ) {
         this.y                 = opt['y'];
         // 高级弹幕有自带的生存时间，为0时永远显示
         this.lt                = opt['lifeTime'] === 0 ? 999999999 : opt['lifeTime'];
+        // 检查是否有自定义字体
+        if( opt['font'] ) {
+            this.font = opt['font'];
+            this.dom.style.fontFamily = this.font;
+        }
 
         // 如果有rotate效果
         this.rY = opt.rY;
@@ -246,11 +251,12 @@ DANMAKU.prototype.displayProperty = function() {
  * 
  */
 DANMAKU.init = function( danmaku_xml_url ) {
-    // 清空当前弹幕池
-    DANMAKU.clear();
-    // 读取弹幕文件
+    // 绑定发送新弹幕事件
+    document.querySelector('#send-danmaku').addEventListener('submit', DANMAKU.send);
+    // 更换弹幕列表
     DANMAKU.load( danmaku_xml_url );
 }
+
 
 /*
  * 销毁弹幕池
@@ -276,6 +282,9 @@ DANMAKU.clear = function() {
  * 
  */
 DANMAKU.load = function( url, callback ) {
+    // 清空当前弹幕池
+    DANMAKU.clear();
+
     // 准备ajax
     var xmlhttp = null;
     if (window.XMLHttpRequest){
@@ -453,7 +462,7 @@ DANMAKU.parse = function( xmlDoc ) {
                     }
                 }
             }
-            // ■这种方块好像效果不大好，█相对来说会好一些
+            // ■这种方块好像效果不大好，█相对来说会好一些？
             if(obj) obj.text = obj.text.replace(/\u25a0/g, "\u2588");
             d.push(obj);
         }
@@ -518,11 +527,74 @@ DANMAKU.validate = function( danmaku ) {
 }
 
 /*
- * 将弹幕插入队列
+ * 用户发送新弹幕
+ *
+ */
+DANMAKU.send = function() {
+    var opt = {};
+    // 弹幕出现时间要根据现在video播放的进度来设置
+    opt.stime = TIME;
+    // demo嘛，就只允许设置mode和text两个参数了
+    var mode = document.querySelector('#danmaku-type');
+    opt.mode = mode.options[mode.selectedIndex].value;
+    opt.text = document.querySelector('#danmaku-text').value;
+
+    // 其他现在都默认填好，需要的话自己多写几个input出来就行了
+    opt.size = 25;
+    opt.color = 16777215;
+
+    /* 其他的参数都由服务端来填，交给js做不安全 */
+    
+    // 检查弹幕有效性
+    if( !DANMAKU.validate(opt) ) return false;
+
+    // 把参数转成url
+    var params = serialize(opt);
+
+    // 准备ajax
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if ( xmlhttp.readyState == 4 ) {
+            // 正常返回数据
+            if( xmlhttp.status == 200 ) {
+                console.log('弹幕发送成功');
+            } else {
+                console.log('弹幕发送失败');
+            }
+        }
+    }
+
+    // 发起ajax
+    xmlhttp.open("GET", GLOBAL_CONFIG.url_dm + '?' + params, true);
+    xmlhttp.send();
+
+    return false;
+}
+
+/*
+ * 把新弹幕插入弹幕队列
  * 
  */
-DANMAKU.insert = function ( danmaku ) {
-
+DANMAKU.insert = function( danmaku ) {
+    DANMAKU_LIST.binsert( danmaku, function(a, b) {
+        // 优先根据弹幕显示时间排序
+        if( a.stime > b.stime ) return 1;
+        else if( a.stime < b.stime ) return -1;
+        // 弹幕时间相同则根据发布时间排序
+        else {
+            if( a.date > b.date ) return 1;
+            else if( a.date < b.date ) return -1;
+            // 如果时间戳也没有就看有没有弹幕id，有的话用弹幕id来比较先后
+            else if( a.id != null && b.id != null ) {
+                if( a.id > b.id ) return 1;
+                else if( a.id < b.id ) return -1;
+                else return 0;
+            } else
+                return 0;
+            // 如果date也没有那就返回相同吧...
+            return 0;
+        }
+    });
 }
 
 /*
