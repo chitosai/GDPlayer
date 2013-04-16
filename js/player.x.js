@@ -3,55 +3,68 @@ var GLOBAL_CONFIG = {
     'debug'             : true, // 是否开启DEBUG模式
     'update_delay'      : 100,  // 更新弹幕池的间隔
     'fps'               : 30,   // 渲染帧数
+    'font'              :
+		'Simhei, Simsun, Heiti, "MS Mincho", "Meiryo", "Microsoft Yahei", monospace', // 默认字体
     'danmaku_life_time' : 5000, // 弹幕显示时间
     'opacity'           : 1,    // 全局弹幕透明度
     'y_move_duration'   : 200,  // top/bottom弹幕重新排列时移动时间
+    'url_dm'            : 'backend/DM.php', // 后台弹幕管理中心
+    'secret_key'        : '!@#$%^&*()', // 验证用户身份用的key
 };
 
 function init() {
 	// 等待video加载完毕，开始初始化弹幕池
-	document.querySelector('video').addEventListener('canplay', function(){
+	document.querySelector('video').addEventListener('canplay', function() {
 		// 初始化video控制器
 		video = new VIDEO( this, document.querySelector('#controller') );
 		// 暂时关掉声音
 		video.video.volume = 0;
 		// 初始化弹幕池
 		stage = new STAGE( document.querySelector('#stage'), video );
-
-	    // 绑定点击弹幕舞台切换播放状态
-	    document.querySelector('#stage').addEventListener( 'click', function(e) {
-	        // 判断点击来自哪里
-	        // 如果直接点击stage或播放按钮可以切换播放状态
-	        if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
-	            video.togglePlay();
-	        // 如果点击在文字上可能是想复制之类的
-	        else if( e.target.nodeName == 'DIV' ) 
-	            return false;
-	        // 不应该还有其他元素... 
-	        else 
-	            console.log(e.target.nodeName);
-	    });
-
-	    // 更换loading图标为播放图标
-	    document.querySelector('#loading').style.display = 'none';
-	    document.querySelector('#play-button').className = 'initial';
-	    // 为了不出现播放按钮从左下角移动进来的动画，等300ms后再加transition
-	    setTimeout(function(){
-	    	document.querySelector('#play-button').style.transition = 'all .3s ease';
-	    }, 300);
 	});
 
 	// 预读弹幕
 	var dsl = document.querySelector('#danmaku-source-list');
 	DANMAKU.init( dsl.options[dsl.selectedIndex].value );
-	// 以及绑定更换弹幕事件
+	// 绑定更换弹幕事件
 	dsl.addEventListener('change', function() {
 		// 保证清理RUNNING_LIST的时候彻底，还是先把视频暂停掉吧...
 		video.pause();
 		// 重新加载弹幕
-		DANMAKU.init( dsl.options[dsl.selectedIndex].value );
+		DANMAKU.load( dsl.options[dsl.selectedIndex].value );
+	});
+
+	// 初始化用户权限
+	var ul = document.querySelector('#user-list');
+	login(ul.options[ul.selectedIndex].value, 'password');
+	// 绑定更换用户身份事件
+	ul.addEventListener('change', function() {
+		login(ul.options[ul.selectedIndex].value, 'password');
 	});
 }
 
 // 
 window.addEventListener('DOMContentLoaded', init);
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * 模拟登录
+ *
+ */
+var login = function( user, password ) {
+	var ctime = new Date().getTime();
+    setCookie('user', user);
+    setCookie('ltime', ctime);
+    setCookie('signature', signature(user, password, ctime));
+}
+
+/*
+ * 生成签名
+ *
+ */
+var signature = function( user, password, ltime ) {
+	return CryptoJS.HmacSHA3( user + '^^^' + ltime + '^^^' + password, GLOBAL_CONFIG.secret_key ).toString();
+}

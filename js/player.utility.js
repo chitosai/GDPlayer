@@ -73,8 +73,6 @@ function checkXML(node) {
 }
 
 
-
-
 /*
  * 把秒数转为时间
  * (second to time)
@@ -91,6 +89,42 @@ var s2t = function(s) {
 }
 
 
+/* 
+ * 把object序列化为string
+ *
+ */
+var serialize = function(obj) {
+    var str = '';
+    for( key in obj ) {
+        str += encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]) + '&';
+    }
+    return str;
+}
+
+/*
+ * cookie
+ *
+ */
+var getCookie = function(c_name) {
+    if( document.cookie.length > 0 ) {
+        var c_start = document.cookie.indexOf( c_name + "=" );
+        if ( c_start != -1 ) { 
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf( ";" , c_start );
+            if ( c_end == -1 ) c_end = document.cookie.length;
+            return unescape(document.cookie.substring(c_start,c_end));
+        }
+    }
+    return ""
+}
+function setCookie(c_name, value, expiredays) {
+    var exdate = new Date();
+    exdate.setDate( exdate.getDate() + expiredays )
+    document.cookie = c_name + "=" + escape(value) 
+        + ( (expiredays == null) ? "" : ";expires=" + exdate.toGMTString() );
+}
+
+
 /*
  * DEBUG
  * 
@@ -99,6 +133,8 @@ var DEBUG = function() {
     if(GLOBAL_CONFIG.debug)
         console.log(arguments);
 }
+
+
 
 
 
@@ -136,7 +172,8 @@ var VIDEO = function( video, controller ) {
 
     // 保存对DOM结构的引用
     this.video = video;
-    this.controller = controller.childNodes[1];
+    this.controller = controller;
+    this.timeline = controller.childNodes[1];
     this.playButton = document.querySelector('#play-button');
 
     // 变量
@@ -145,10 +182,32 @@ var VIDEO = function( video, controller ) {
     this.update = 0; // 检查更新，包括视频进度条和新弹幕插入
     this.frame = 0;  // 每帧的计算与显示
     self.timer = 0; // 专门用来更新播放进度
-    
-    // 初始化进度条总长度
-    this.controller.style.animationDuration = this.len + 's';
-    this.controller.style.webkitAnimationDuration = this.len + 's';
+
+    /* 
+     * 绑定播放控制事件
+     */
+    // 绑定点击弹幕舞台切换播放状态
+    document.querySelector('#stage').addEventListener( 'click', function(e) {
+        // 判断点击来自哪里
+        // 如果直接点击stage或播放按钮可以切换播放状态
+        if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
+            self.togglePlay();
+        // 如果点击在文字上可能是想复制之类的
+        else if( e.target.nodeName == 'DIV' ) 
+            return false;
+        // 不应该还有其他元素... 
+        else 
+            console.log(e.target.nodeName);
+    });
+
+    // 更换loading图标为播放图标
+    document.querySelector('#loading').style.display = 'none';
+    document.querySelector('#play-button').className = 'initial';
+    // 为了不出现播放按钮从左下角移动进来的动画，等300ms后再加transition
+    setTimeout(function(){
+        document.querySelector('#play-button').style.transition = 'all .3s ease';
+    }, 300);
+
     
     /*
      * 获取播放进度
@@ -169,6 +228,10 @@ var VIDEO = function( video, controller ) {
         // 更新当前播放时间专用
         self.timer = setInterval( function() {
             TIME = self.video.currentTime * 1000;
+            // 更新播放进度条
+            self.timeline.style.width = self.video.currentTime * 100 / self.len  + '%';
+            // 在进度条上显示当前播放时间点
+            self.controller.setAttribute('title', s2t(TIME));
         }, 10);
     };
     // 清除timer
@@ -215,9 +278,6 @@ var VIDEO = function( video, controller ) {
     // 播放
     this.video.addEventListener('play', function() {
         self.startTimer();
-        // 让进度条继续前进
-        self.controller.style.animationPlayState = 'running';
-        self.controller.style.webkitAnimationPlayState = 'running';
         // 隐藏播放按钮
         self.playButton.className = '';
     });
@@ -230,9 +290,6 @@ var VIDEO = function( video, controller ) {
     // 用户暂停
     this.video.addEventListener('pause', function() {
         self.stopTimer();
-        // 让进度条停下来
-        self.controller.style.animationPlayState = 'paused';
-        self.controller.style.webkitAnimationPlayState = 'paused';
         // 显示播放按钮
         self.playButton.className = 'paused';
     });

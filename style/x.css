@@ -15,14 +15,21 @@ body{
 	left: 0;
 	z-index: 0;
 }
-#select-danmaku{
+#select-danmaku,
+#select-user{
 	border-left: 3px solid;
 	font-size: 12px;
 	line-height: 1;
-	top: 130px;
-	left: 10px;
 	padding: 0 7px;
 	position: absolute;
+}
+#select-danmaku{
+	top: 130px;
+	left: 10px;
+}
+#select-user{
+	top: 160px;
+	left: 10px;
 }
 
 #wrapper{
@@ -48,6 +55,7 @@ video{
 #play-button{
 	background: #fff;
 	border-radius: 2px;
+	box-shadow: 0 0 1px #666, 0 0 7px #aaa;
 	color: #555;
 	cursor: pointer;
 	font-size: 24px;
@@ -59,6 +67,7 @@ video{
 	z-index: 999;
 }
 #play-button:hover{
+	box-shadow: 0 0 1px #69f, 0 0 15px #aaa;
 	color: #69f;
 }
 #play-button.paused{
@@ -109,6 +118,7 @@ video{
 
 #controller{
 	background: #ccc;
+	display: block;
 	width: 100%;
 }
 #timeline{
@@ -116,17 +126,8 @@ video{
 	border-right: 1px solid #c60;
 	height: 5px;
 	width: 0%;
-	animation-name: timeline;
-	-webkit-animation-name: timeline;
-	animation-timing-function: linear;
-	-webkit-animation-timing-function: linear;
-	animation-play-state: paused;
-	-webkit-animation-play-state: paused;
 }
-@-webkit-keyframes timeline{
-	0%   { width: 0%; }
-	100% { width: 100%; }
-}
+
 #send-danmaku{
 	margin: 10px;
 }

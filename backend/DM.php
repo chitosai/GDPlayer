@@ -1,11 +1,17 @@
 <?php
-// 欢迎来到弹幕管理中心
 // Danmaku Manager
 
 /*
- * 向后台要求增加新弹幕
+ * 要求增加新弹幕
  *
  */
-function NewDanmaku( $user, $mode, $text, $hash ) {
+function InsertDanmaku( $stime, $mode, $text, $size, $color ) {
+	// 补充数据
+	$date = new Date().getdate();
+}
 
+if(isset($_GET['mode'])) {
+	InsertDanmaku( $_GET['stime'], $_GET['mode'], $_GET['text'], $_GET['size'], $_GET['color'] );
+} else {
+	echo 'FOR PANDARIA!!'
 }
