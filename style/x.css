@@ -99,15 +99,16 @@ video{
 	-webkit-text-size-adjust: none;
 }
 .scrollDanmaku{
+	padding: 1.5px 0 1.5px 5px;
 	white-space: nowrap;
-	padding-top: 3.5px;
 }
 .bottomDanmaku{
 	text-align: center;
-	padding-top: 3.5px;
+	padding: 1.75px 0 1.75px 5px;
 }
 .topDanmaku{
 	text-align: center;
+	padding: 1.75px 0 1.75px 5px;
 }
 .specialDanmaku{
 	-webkit-transform-style: preserve-3d;
@@ -164,6 +165,7 @@ video{
 	border-radius: 2px;
 	box-shadow: 0 1px 0 #fff inset;
 	color: #404040;
+	cursor: pointer;
 	font-size: 14px;
 	font-family: inherit;
 	line-height: 21px;

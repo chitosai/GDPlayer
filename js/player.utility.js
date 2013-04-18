@@ -124,6 +124,20 @@ function setCookie(c_name, value, expiredays) {
         + ( (expiredays == null) ? "" : ";expires=" + exdate.toGMTString() );
 }
 
+/*
+ * 把10进制颜色代码转换为16进制颜色代码
+ * （DEC TO HEX）
+ */
+function d2h(DEC) {
+    var HEX = parseInt(DEC).toString(16);
+    if( HEX.length < 6 ) HEX = '0' + HEX;
+    return '#' + HEX;
+}
+// 这个相反
+function h2d(HEX) {
+    return HEX.toString(10);
+}
+
 
 /*
  * DEBUG

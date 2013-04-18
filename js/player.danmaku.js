@@ -20,10 +20,11 @@ var DANMAKU = function( opt, time ) {
     this.text        = opt['text'];
     this.stime       = opt['stime'];
     this.size        = opt['size'];
-    this.color       = opt['color'];
+    this.color       = d2h(opt['color']);
     this.mode        = opt['mode'];
     this.date        = opt['date'];
     this.hash        = opt['hash'];
+    this.isNew       = (opt['isNew'] && (opt['mode'] < 7)) ? true : false;
     this.opacity     = GLOBAL_CONFIG.opacity;
     this.font        = GLOBAL_CONFIG.font;
     this.lt          = GLOBAL_CONFIG.danmaku_life_time;
@@ -37,6 +38,8 @@ var DANMAKU = function( opt, time ) {
     this.dom.style.fontSize = this.size + 'px';
     this.dom.style.fontFamily = this.font;
     this.dom.style.opacity = this.opacity;
+    // 自己发的弹幕会带边框
+    if( this.isNew ) this.dom.style.boxShadow = '0 0 0 1px ' + this.color + ', 0 0 0 2px rgba(0, 0, 0, .75)';
 
     // 带上响应的特殊class
     this.className = 'danmaku ';
@@ -111,7 +114,7 @@ var DANMAKU = function( opt, time ) {
     RUNNING_LIST.push(this);
 
     // 在弹幕列表中给这条弹幕加个激活状态
-    document.querySelector('#d' + this.id).className = 'active';
+    if( !this.isNew ) document.querySelector('#d' + this.id);
 }
 
 /*
@@ -222,7 +225,7 @@ DANMAKU.prototype.remove = function() {
     // 从正在显示队列中移除
     RUNNING_LIST.remove(this);
     // 去除弹幕列表中这条弹幕的激活状态
-    document.querySelector('#d' + this.id).className = '';
+    if( !this.isNew ) document.querySelector('#d' + this.id).className = '';
 }
 
 /*
@@ -355,13 +358,6 @@ DANMAKU.load = function( url, callback ) {
  * 
  */
 DANMAKU.parse = function( xmlDoc ) {
-    // 将十进制颜色数值填充到6位
-    function fillRGB(string){
-        while(string.length < 6){
-            string = "0" + string;
-        }
-        return string;
-    }
     // 每条弹幕在xml文件中是一个d节点
     var elems = xmlDoc.getElementsByTagName('d');
     var d = [];
@@ -375,12 +371,12 @@ DANMAKU.parse = function( xmlDoc ) {
             var obj = {};
             // 弹幕出现时间
             obj.stime = Math.round( parseFloat(opt[0]*1000) );
+            // 弹幕类型
+            obj.mode = parseInt(opt[1]);
             // 字体大小 font-size
             obj.size = parseInt(opt[2]);
             // 弹幕颜色
-            obj.color = "#" + fillRGB( parseInt(opt[3]).toString(16) );
-            // 弹幕类型
-            obj.mode = parseInt(opt[1]);
+            obj.color = parseInt(opt[3]);
             // 发送时间戳
             obj.date = parseInt(opt[4]);
             // 弹幕池，不知做啥的，似乎要自己算
@@ -533,17 +529,22 @@ DANMAKU.validate = function( danmaku ) {
 DANMAKU.send = function() {
     var opt = {};
     // 弹幕出现时间要根据现在video播放的进度来设置
-    opt.stime = TIME;
+    // 为了保证会立即显示出来，把弹幕放在.1s之后
+    opt.stime = TIME + 100;
     // demo嘛，就只允许设置mode和text两个参数了
     var mode = document.querySelector('#danmaku-type');
-    opt.mode = mode.options[mode.selectedIndex].value;
+    opt.mode = parseInt(mode.options[mode.selectedIndex].value);
     opt.text = document.querySelector('#danmaku-text').value;
 
-    // 其他现在都默认填好，需要的话自己多写几个input出来就行了
+    // 其他都暂且填默认数据，需要的话自己多写几个input出来就行了
     opt.size = 25;
     opt.color = 16777215;
+    opt.date = new Date().getTime();
 
-    /* 其他的参数都由服务端来填，交给js做不安全 */
+    // 标明这条弹幕是新加入的
+    opt.isNew = true;
+
+    /* 再其他的参数都由服务端来填，交给js做不安全 */
     
     // 检查弹幕有效性
     if( !DANMAKU.validate(opt) ) return false;
@@ -557,6 +558,9 @@ DANMAKU.send = function() {
         if ( xmlhttp.readyState == 4 ) {
             // 正常返回数据
             if( xmlhttp.status == 200 ) {
+                // 把弹幕插进队列
+                DANMAKU.insert(opt);
+                document.querySelector('#danmaku-text').value = '';
                 console.log('弹幕发送成功');
             } else {
                 console.log('弹幕发送失败');

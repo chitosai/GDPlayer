@@ -36,6 +36,7 @@ function init() {
 
 	// 初始化用户权限
 	var ul = document.querySelector('#user-list');
+	// 演示状态，密码什么的就算了直接传"password"
 	login(ul.options[ul.selectedIndex].value, 'password');
 	// 绑定更换用户身份事件
 	ul.addEventListener('change', function() {

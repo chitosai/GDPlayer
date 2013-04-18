@@ -12,11 +12,11 @@
         <div id="select-danmaku">
             弹幕源&nbsp;
             <select name="" id="danmaku-source-list">
-                <option value="local/av364356.xml">av364356</option>
+                <option value="local/av364356.xml" selected>av364356</option>
                 <option value="local/av505538.xml">av505538</option>
                 <option value="local/av122647.xml">av122647</option>
                 <option value="local/test-x.xml">收集</option>
-                <option value="local/test.xml" selected>测试</option>
+                <option value="local/test.xml">测试</option>
             </select>
         </div>
         <!-- 选择用户身份 -->
@@ -57,7 +57,7 @@
                     <option value="7">特殊弹幕</option>
                 </select>
                 <!-- 弹幕文本 -->
-                <input type="text" id="danmaku-text">
+                <input type="text" id="danmaku-text" placeholder="要发送新弹幕吗">
                 <input type="submit" value="发送" id="do-send-danmaku">
             </form>
         </div>
