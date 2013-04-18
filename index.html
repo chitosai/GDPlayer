@@ -16,7 +16,7 @@
                 <option value="local/av505538.xml">av505538</option>
                 <option value="local/av122647.xml">av122647</option>
                 <option value="local/test-x.xml">收集</option>
-                <option value="local/test.xml">测试</option>
+                <option value="backend/DM.php">测试</option>
             </select>
         </div>
         <!-- 选择用户身份 -->
@@ -47,7 +47,7 @@
                 </a>
             </div>
             <!-- 发送弹幕 -->
-            <form id="send-danmaku" action="#" method="GET">
+            <div id="send-danmaku">
                 <span id="toggle-button">▶</span>
                 <!-- 选择新弹幕的类型 -->
                 <select name="" id="danmaku-type">
@@ -60,14 +60,14 @@
                 <!-- 弹幕文本 -->
                 <input type="text" id="danmaku-text" placeholder="要发送新弹幕吗">
                 <input type="submit" value="发送" id="do-send-danmaku">
-            </form>
+            </div>
         </div>
 		
         <!-- 弹幕列表 -->
         <div id="danmaku-list"></div>
 
 		<!-- Scripts -->
-        <script src="js/crypto.hmac-sha3.js"></script>
+        <script src="js/crypto.sha256.js"></script>
 		<script src="js/player.utility.js"></script>
         <script src="js/player.danmaku.js"></script>
         <script src="js/player.danmaku.spaceManager.js"></script>

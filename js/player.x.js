@@ -9,7 +9,6 @@ var GLOBAL_CONFIG = {
     'opacity'           : 1,    // 全局弹幕透明度
     'y_move_duration'   : 200,  // top/bottom弹幕重新排列时移动时间
     'url_dm'            : 'backend/DM.php', // 后台弹幕管理中心
-    'secret_key'        : '!@#$%^&*()', // 验证用户身份用的key
 };
 
 function init() {
@@ -24,6 +23,14 @@ function init() {
 
 		// 弹幕发送条里的播放按钮
 		document.querySelector('#toggle-button').addEventListener('click', video.togglePlay);
+
+	    // 绑定发送新弹幕事件
+	    document.querySelector('#do-send-danmaku').addEventListener('click', DANMAKU.send);
+	    document.querySelector('#danmaku-text').addEventListener('keydown', function(e) {
+	    	// 检查是否是回车
+	    	if( e.keyCode == 13 ) DANMAKU.send();
+	    	return false;
+	    });
 	});
 
 	// 预读弹幕
@@ -59,16 +66,14 @@ window.addEventListener('DOMContentLoaded', init);
  *
  */
 var login = function( user, password ) {
-	var ctime = new Date().getTime();
     setCookie('user', user);
-    setCookie('ltime', ctime);
-    setCookie('signature', signature(user, password, ctime));
+    setCookie('signature', signature(user, password));
 }
 
 /*
  * 生成签名
  *
  */
-var signature = function( user, password, ltime ) {
-	return CryptoJS.HmacSHA3( user + '^^^' + ltime + '^^^' + password, GLOBAL_CONFIG.secret_key ).toString();
+var signature = function( user, password ) {
+	return CryptoJS.SHA256( user + '^^^' + password ).toString();
 }

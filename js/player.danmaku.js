@@ -254,8 +254,6 @@ DANMAKU.prototype.displayProperty = function() {
  * 
  */
 DANMAKU.init = function( danmaku_xml_url ) {
-    // 绑定发送新弹幕事件
-    document.querySelector('#send-danmaku').addEventListener('submit', DANMAKU.send);
     // 更换弹幕列表
     DANMAKU.load( danmaku_xml_url );
 }
@@ -539,7 +537,6 @@ DANMAKU.send = function() {
     // 其他都暂且填默认数据，需要的话自己多写几个input出来就行了
     opt.size = 25;
     opt.color = 16777215;
-    opt.date = new Date().getTime();
 
     // 标明这条弹幕是新加入的
     opt.isNew = true;
@@ -558,8 +555,22 @@ DANMAKU.send = function() {
         if ( xmlhttp.readyState == 4 ) {
             // 正常返回数据
             if( xmlhttp.status == 200 ) {
-                // 把弹幕插进队列
+                // 检查返回值
+                var response = xmlhttp.responseText;
+                // 返回值不以[OK]开头，说明有问题
+                if( response.indexOf('[OK]') !== 0 ) {
+                    console.log('弹幕发送失败 ' + responseText);
+                    return false;
+                }
+                // 没有问题就把弹幕插进队列
+                // 补齐信息
+                var data = response.substr(4).split(',');
+                opt['id'] = data[0];
+                opt['hash'] = data[1];
+                opt['date'] = data[2];
+                // 插入！
                 DANMAKU.insert(opt);
+                // 清空输入框
                 document.querySelector('#danmaku-text').value = '';
                 console.log('弹幕发送成功');
             } else {
