@@ -21,6 +21,9 @@ function init() {
 		video.video.volume = 0;
 		// 初始化弹幕池
 		stage = new STAGE( document.querySelector('#stage'), video );
+
+		// 弹幕发送条里的播放按钮
+		document.querySelector('#toggle-button').addEventListener('click', video.togglePlay);
 	});
 
 	// 预读弹幕

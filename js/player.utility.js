@@ -189,6 +189,7 @@ var VIDEO = function( video, controller ) {
     this.controller = controller;
     this.timeline = controller.childNodes[1];
     this.playButton = document.querySelector('#play-button');
+    this.toggleButton = document.querySelector('#toggle-button');
 
     // 变量
     this.paused = true;
@@ -221,7 +222,6 @@ var VIDEO = function( video, controller ) {
     setTimeout(function(){
         document.querySelector('#play-button').style.transition = 'all .3s ease';
     }, 300);
-
     
     /*
      * 获取播放进度
@@ -294,17 +294,23 @@ var VIDEO = function( video, controller ) {
         self.startTimer();
         // 隐藏播放按钮
         self.playButton.className = '';
+        // 下方的播放按钮切换为暂停图标
+        self.toggleButton.innerHTML = '■';
     });
     // 播放完毕
     this.video.addEventListener('ended', function() {
         self.stopTimer();
         // 显示播放按钮
         self.playButton.className = 'paused';
+        // 下方的播放按钮切换为播放图标
+        self.toggleButton.innerHTML = '▶';
     });
     // 用户暂停
     this.video.addEventListener('pause', function() {
         self.stopTimer();
         // 显示播放按钮
         self.playButton.className = 'paused';
+        // 下方的播放按钮切换为播放图标
+        self.toggleButton.innerHTML = '▶';
     });
 }
