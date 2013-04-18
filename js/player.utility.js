@@ -130,7 +130,9 @@ function setCookie(c_name, value, expiredays) {
  */
 function d2h(DEC) {
     var HEX = parseInt(DEC).toString(16);
-    if( HEX.length < 6 ) HEX = '0' + HEX;
+    while( HEX.length < 6 ) {
+        HEX = '0' + HEX;
+    }
     return '#' + HEX;
 }
 // 这个相反
