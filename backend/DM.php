@@ -30,29 +30,34 @@ function validateRequest() {
 	if( !isset($_GET['mode']) )
 		return 'FOR PANDARIA!!!!';
 
-	// 验证身份
+	// 检查身份
 	if( isset($_COOKIE['user']) && isset($_COOKIE['signature']) ) {
+		// 取用户数据
 		$db = new mysql();
 		$_user = $db->select(array(
 			'table' => 'user',
 			'condition' => "user='" . mysql_real_escape_string($_COOKIE['user']) . "'"
 		));
-
 		if( !count($_user) ) {
 			return '用户名不存在';
 		}
-
 		$user = $_user[0]['user'];
-		if( $user['signature'] === $_COOKIE['signature'] ) {
-			// 设置php时区
-			date_default_timezone_set('Asia/Shanghai');
-			// 检查发送间隔
-			if( time() - strtotime($user['lastpost']) < POST_COOLDOWN ) {
-				return '说话太快了！';
-			}
-			return true;
-		} else
+
+		// 验证身份
+		if( $user['signature'] !== $_COOKIE['signature'] )
 			return '用户名或密码错误';
+
+		// 检查发送间隔
+		date_default_timezone_set('Asia/Shanghai');
+		if( time() - strtotime($user['lastpost']) < POST_COOLDOWN ) {
+			return '说话太快了！';
+		}
+
+		// 验权
+		if( intval($user['privilege']) < intval($_GET['mode']) )
+			return '权限不足';
+
+		return true;
 	} else
 		return '需要登录';
 }
