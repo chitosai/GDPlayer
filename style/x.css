@@ -190,6 +190,22 @@ video{
 	border-color: #555;
 	color: #111;
 }
+#message{
+	background: #F74343;
+	color: #fff;
+	text-align: center;
+	margin: 10px 6px 0 1px;
+	opacity: 0;
+	padding: 3px;
+	-webkit-transition: opacity .3s ease;
+	-moz-transition: opacity .3s ease;
+	-ms-transition: opacity .3s ease;
+	-o-transition: opacity .3s ease;
+	transition: opacity .3s ease;
+}
+#message.active{
+	opacity: 1;
+}
 
 #danmaku-list{
 	height: 100%;

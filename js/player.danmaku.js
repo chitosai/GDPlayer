@@ -310,7 +310,7 @@ DANMAKU.load = function( url, callback ) {
 
                 // 检查xml是否为空
                 if( !xmldoc || !validateXML(xmldoc) ) {
-                    console.log( '弹幕文件无效' );
+                    MSG( '弹幕文件无效' );
                     return;
                 }
 
@@ -451,7 +451,7 @@ DANMAKU.parse = function( xmlDoc ) {
                         }
                     } catch(e) {
                         // 唔……解析不出来
-                        console.log('无法解析高级弹幕的JSON:', e, e.message);
+                        MSG('无法解析高级弹幕的JSON:', e, e.message);
                         console.log(text);
                     }
                 }
@@ -559,7 +559,7 @@ DANMAKU.send = function() {
                 var response = xmlhttp.responseText;
                 // 返回值不以[OK]开头，说明有问题
                 if( response.indexOf('[OK]') !== 0 ) {
-                    console.log('弹幕发送失败 ' + responseText);
+                    MSG('弹幕发送失败 : ' + response);
                     return false;
                 }
                 // 没有问题就把弹幕插进队列
@@ -572,9 +572,9 @@ DANMAKU.send = function() {
                 DANMAKU.insert(opt);
                 // 清空输入框
                 document.querySelector('#danmaku-text').value = '';
-                console.log('弹幕发送成功');
+                MSG('弹幕发送成功');
             } else {
-                console.log('弹幕发送失败');
+                MSG('弹幕发送失败');
             }
         }
     }

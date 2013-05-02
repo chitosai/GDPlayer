@@ -63,7 +63,7 @@ function checkXML(node) {
         h3OK = true;
     }
     if( ename == '#text' ) {
-        console.log( node.nodeValue );
+        MSG( node.nodeValue );
     }
     var l = node.childNodes.length;
     for( var i = 0; i < l; i++ ) {
@@ -142,12 +142,21 @@ function h2d(HEX) {
 
 
 /*
- * DEBUG
+ * MSG
+ * 
  * 
  */
-var DEBUG = function() {
+var MSG = function() {
     if(GLOBAL_CONFIG.debug)
         console.log(arguments);
+    msg = document.querySelector('#message');
+    msg.innerHTML = arguments[0];
+    msg.className = 'active';
+    if( typeof msg_count != 'undefined' && msg_count != 0 ) clearTimeout(msg_count);
+    msg_count = setTimeout(function(){
+        msg.className = '';
+        msg_count = 0;
+    }, 3000);
 }
 
 
@@ -214,7 +223,7 @@ var VIDEO = function( video, controller ) {
             return false;
         // 不应该还有其他元素... 
         else 
-            console.log(e.target.nodeName);
+            MSG(e.target.nodeName);
     });
 
     // 更换loading图标为播放图标
