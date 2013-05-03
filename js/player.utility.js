@@ -3,7 +3,7 @@
  * 
 **/
 // 从array中删除object
-Array.prototype.remove = function( obj ){
+Array.prototype.remove = function( obj ) {
     for(var a = 0; a < this.length; a++)
         if( this[a] == obj ) {
             this.splice(a,1);
@@ -11,7 +11,7 @@ Array.prototype.remove = function( obj ){
         }
 };
 // 二分查找，返回的是what在array中的位置{int}
-Array.prototype.bsearch = function( what, how ){
+Array.prototype.bsearch = function( what, how ) {
     if( this.length == 0 ) return 0;
     if( how(what,this[0]) < 0 ) return 0;
     if( how(what,this[this.length - 1]) >= 0 ) return this.length;
@@ -37,9 +37,11 @@ Array.prototype.bsearch = function( what, how ){
     return -1;
 };
 // 二分插入
-Array.prototype.binsert = function(what,how){
+Array.prototype.binsert = function(what,how) {
     this.splice( this.bsearch(what, how), 0, what );
 };
+
+
 
 
 /*
@@ -100,6 +102,20 @@ var serialize = function(obj) {
     }
     return str;
 }
+// 相反
+var unserialize = function(str) {
+    var array = str.split('&');
+    if( array.length < 2 ) return false;
+
+    var obj = {};
+    for( var i = 0; i < array.length; i++ ) {
+        var pair = array[i].split('=');
+        if( pair.length < 2 ) continue;
+
+        obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+    }
+    return obj;
+}
 
 /*
  * cookie
@@ -142,8 +158,7 @@ function h2d(HEX) {
 
 
 /*
- * MSG
- * 
+ * 显示给用户的消息
  * 
  */
 var MSG = function() {
@@ -157,6 +172,23 @@ var MSG = function() {
         msg.className = '';
         msg_count = 0;
     }, 3000);
+}
+
+/*
+ * 调试用的消息
+ * 
+ */
+function DEBUG(msg) {
+    // 非文本不要乱来
+    if( typeof msg != 'string' ) {
+        console.log(arguments);
+        return;
+    }
+
+    // 文本的加上时间戳
+    var date = new Date(),
+        time = '[' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ']';
+    console.log( time + msg );
 }
 
 

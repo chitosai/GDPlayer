@@ -254,8 +254,10 @@ DANMAKU.prototype.displayProperty = function() {
  * 
  */
 DANMAKU.init = function( danmaku_xml_url ) {
-    // 更换弹幕列表
+    // 初始化弹幕
     DANMAKU.load( danmaku_xml_url );
+    // 与后台弹幕管理建立长连接
+    SOCKET = new socket();
 }
 
 
@@ -452,7 +454,7 @@ DANMAKU.parse = function( xmlDoc ) {
                     } catch(e) {
                         // 唔……解析不出来
                         MSG('无法解析高级弹幕的JSON:', e, e.message);
-                        console.log(text);
+                        DEBUG(text);
                     }
                 }
             }
@@ -527,8 +529,8 @@ DANMAKU.validate = function( danmaku ) {
 DANMAKU.send = function() {
     var opt = {};
     // 弹幕出现时间要根据现在video播放的进度来设置
-    // 为了保证会立即显示出来，把弹幕放在.1s之后
-    opt.stime = TIME + 100;
+    // 为了保证会立即显示出来，把弹幕放在.5s之后
+    opt.stime = TIME + 500;
     // demo嘛，就只允许设置mode和text两个参数了
     var mode = document.querySelector('#danmaku-type');
     opt.mode = parseInt(mode.options[mode.selectedIndex].value);
@@ -538,8 +540,9 @@ DANMAKU.send = function() {
     opt.size = 25;
     opt.color = 16777215;
 
-    // 标明这条弹幕是新加入的
-    opt.isNew = true;
+    // 用户身份
+    opt.user = getCookie('user');
+    opt.signature = getCookie('signature');
 
     /* 再其他的参数都由服务端来填，交给js做不安全 */
     
@@ -549,39 +552,8 @@ DANMAKU.send = function() {
     // 把参数转成url
     var params = serialize(opt);
 
-    // 准备ajax
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if ( xmlhttp.readyState == 4 ) {
-            // 正常返回数据
-            if( xmlhttp.status == 200 ) {
-                // 检查返回值
-                var response = xmlhttp.responseText;
-                // 返回值不以[OK]开头，说明有问题
-                if( response.indexOf('[OK]') !== 0 ) {
-                    MSG('弹幕发送失败 : ' + response);
-                    return false;
-                }
-                // 没有问题就把弹幕插进队列
-                // 补齐信息
-                var data = response.substr(4).split(',');
-                opt['id'] = data[0];
-                opt['hash'] = data[1];
-                opt['date'] = data[2];
-                // 插入！
-                DANMAKU.insert(opt);
-                // 清空输入框
-                document.querySelector('#danmaku-text').value = '';
-                MSG('弹幕发送成功');
-            } else {
-                MSG('弹幕发送失败');
-            }
-        }
-    }
-
-    // 发起ajax
-    xmlhttp.open("GET", GLOBAL_CONFIG.url_dm + '?' + params, true);
-    xmlhttp.send();
+    // 发送新增弹幕请求
+    SOCKET.send(params);
 
     return false;
 }
