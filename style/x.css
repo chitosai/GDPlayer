@@ -131,6 +131,19 @@ video{
 
 #send-danmaku{
 	margin: 10px;
+	position: relative;
+}
+#offline{
+	background: #FC5151;
+	border-radius: 2px;
+	color: #fff;
+	display: none;
+	font-size: 10px;
+	padding: 0 2px;
+	position: absolute;
+	right: 60px;
+	top: 6px;
+	z-index: 9;
 }
 #toggle-button{
 	background: #fff;

@@ -544,15 +544,26 @@ DANMAKU.send = function() {
     opt.signature = getCookie('signature');
 
     /* 再其他的参数都由服务端来填，交给js做不安全 */
-    
+
     // 检查弹幕有效性
     if( !DANMAKU.validate(opt) ) return false;
+    
+    // 检查是否允许忽略弹幕管理，允许的话不请求后台，直接加入弹幕队列
+    if( GLOBAL_CONFIG.ignore_dm ) {
+        // 增加边框
+        opt.isNew = true;
+        DANMAKU.insert(opt);
+        // 清空输入框
+        document.querySelector('#danmaku-text').value = '';
+        // 提示
+        MSG('发送了一条本地弹幕');
+    } else {
+        // 把参数转成url
+        var params = serialize(opt);
 
-    // 把参数转成url
-    var params = serialize(opt);
-
-    // 发送新增弹幕请求
-    SOCKET.send(params);
+        // 发送新增弹幕请求
+        SOCKET.send(params);
+    }
 
     return false;
 }

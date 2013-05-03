@@ -162,8 +162,8 @@ function h2d(HEX) {
  * 
  */
 var MSG = function() {
-    if(GLOBAL_CONFIG.debug)
-        console.log(arguments);
+    console.log(arguments);
+    
     msg = document.querySelector('#message');
     msg.innerHTML = arguments[0];
     msg.className = 'active';

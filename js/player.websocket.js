@@ -1,14 +1,13 @@
 function socket() {
   this.socket = null;
-  this.host = "ws://localhost:12345/websocket/server.php";
 
   try {
-    this.socket = new WebSocket(this.host);
-    DEBUG('初始化WebSocket');
+    this.socket = new WebSocket(GLOBAL_CONFIG.dm);
+    MSG('初始化WebSocket');
 
     /////////
     this.socket.onopen    = function(msg) { 
-      DEBUG("已连接"); 
+      MSG("已连接上弹幕服务器"); 
     };
 
     ////////
@@ -38,7 +37,6 @@ function socket() {
       danmaku.size = parseInt(danmaku.size);
       danmaku.stime = parseInt(danmaku.stime);
 
-
       // 判断是否是本人发的
       if( danmaku['user'] == getCookie('user') ) {
         danmaku.isNew = true;
@@ -58,7 +56,11 @@ function socket() {
 
     ////////
     this.socket.onclose   = function(msg) { 
-      DEBUG("已断开：" + this.readyState); 
+      // 把全局设置改为允许忽略弹幕服务器
+      GLOBAL_CONFIG.ignore_dm = true;
+      // 显示出离线提示
+      document.querySelector('#offline').style.display = 'block';
+      MSG("无法连接弹幕服务器，进入离线模式"); 
     };
 
 
