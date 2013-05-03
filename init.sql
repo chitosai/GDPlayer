@@ -10,11 +10,11 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 -- 
--- 数据库: `danmaku`
+-- 数据库: `GDPlayer`
 -- 
-DROP DATABASE IF EXISTS `danmaku`;
-CREATE DATABASE `danmaku`;
-USE danmaku;
+DROP DATABASE IF EXISTS `GDPlayer`;
+CREATE DATABASE `GDPlayer`;
+USE GDPlayer;
 
 -- --------------------------------------------------------
 
