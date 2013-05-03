@@ -12,7 +12,7 @@ GraduationDesignPlayer - 毕设播放器（无误
 - 算法及逻辑主要来源于[ABPlayerHTML5](https://github.com/jabbany/ABPlayerHTML5)和[AcfunPlayerX](http://www.acfun.tv/)
 
 <pre>
-mysql -u user -p < init.sql
+mysql -u user -p &lt; init.sql
 cd backend
 php -q DM.php
 </pre>
