@@ -50,6 +50,10 @@ function socket() {
 
       // 插入！
       DANMAKU.insert(danmaku);
+      // 手动检查，如果播放进度已经超过该弹幕的出现时间点，但该弹幕还在生命周期内那就手动把它显示出来
+      if( danmaku.stime < TIME && ( danmaku.stime + GLOBAL_CONFIG.danmaku_life_time ) > TIME ) {
+        new DANMAKU( danmaku, TIME );
+      }
     };
 
     ////////

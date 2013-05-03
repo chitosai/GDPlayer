@@ -529,8 +529,7 @@ DANMAKU.validate = function( danmaku ) {
 DANMAKU.send = function() {
     var opt = {};
     // 弹幕出现时间要根据现在video播放的进度来设置
-    // 为了保证会立即显示出来，把弹幕放在.5s之后
-    opt.stime = TIME + 500;
+    opt.stime = TIME;
     // demo嘛，就只允许设置mode和text两个参数了
     var mode = document.querySelector('#danmaku-type');
     opt.mode = parseInt(mode.options[mode.selectedIndex].value);
