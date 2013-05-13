@@ -42,6 +42,15 @@ Array.prototype.binsert = function(what,how) {
 };
 
 
+/*
+ * 去掉一个class
+ *
+ */
+function removeClass( node, classname ) {
+    node.className = node.className.replace( new RegExp('\\b' + classname + '\\b'), '' );
+}
+
+
 
 
 /*
@@ -75,6 +84,9 @@ function checkXML(node) {
 }
 
 
+
+
+
 /*
  * 把秒数转为时间
  * (second to time)
@@ -89,6 +101,9 @@ var s2t = function(s) {
     if( second < 10 ) second = '0' + second;
     return hour + ':' + minute + ':' + second;
 }
+
+
+
 
 
 /* 
@@ -117,6 +132,10 @@ var unserialize = function(str) {
     return obj;
 }
 
+
+
+
+
 /*
  * cookie
  *
@@ -140,6 +159,9 @@ function setCookie(c_name, value, expiredays) {
         + ( (expiredays == null) ? "" : ";expires=" + exdate.toGMTString() );
 }
 
+
+
+
 /*
  * 把10进制颜色代码转换为16进制颜色代码
  * （DEC TO HEX）
@@ -155,6 +177,10 @@ function d2h(DEC) {
 function h2d(HEX) {
     return HEX.toString(10);
 }
+
+
+
+
 
 
 /*
@@ -173,6 +199,10 @@ var MSG = function() {
         msg_count = 0;
     }, 3000);
 }
+
+
+
+
 
 /*
  * 调试用的消息
@@ -224,6 +254,7 @@ var STAGE = function(stage, video) {
  * 
  */
 var TIME = 0; // 当前播放时间
+var isPlaying = false;
 var VIDEO = function( video, controller ) {
     var self = this;
 
@@ -250,9 +281,14 @@ var VIDEO = function( video, controller ) {
         // 如果直接点击stage或播放按钮可以切换播放状态
         if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
             self.togglePlay();
-        // 如果点击在文字上可能是想复制之类的
-        else if( e.target.nodeName == 'DIV' ) 
-            return false;
+        // 如果点击在文字上可能是想复制之类的，不过只在暂停状态下有效
+        // 正常播放时点击文字也是暂停效果
+        else if(  e.target.nodeName == 'DIV' ) {
+            if( isPlaying ) 
+                self.togglePlay();
+            else 
+                return false;
+        } 
         // 不应该还有其他元素... 
         else 
             MSG(e.target.nodeName);
@@ -334,14 +370,22 @@ var VIDEO = function( video, controller ) {
      */
     // 播放
     this.video.addEventListener('play', function() {
+        // 全局播放状态标志
+        isPlaying = true;
+        
         self.startTimer();
         // 隐藏播放按钮
         self.playButton.className = '';
         // 下方的播放按钮切换为暂停图标
         self.toggleButton.innerHTML = '■';
+        // 取消弹幕的悬浮高亮状态
+        DANMAKU.hoverHighLight(false);
     });
     // 播放完毕
     this.video.addEventListener('ended', function() {
+        // 全局播放状态标志
+        isPlaying = false;
+        
         self.stopTimer();
         // 显示播放按钮
         self.playButton.className = 'paused';
@@ -350,10 +394,15 @@ var VIDEO = function( video, controller ) {
     });
     // 用户暂停
     this.video.addEventListener('pause', function() {
+        // 全局播放状态标志
+        isPlaying = false;
+
         self.stopTimer();
         // 显示播放按钮
         self.playButton.className = 'paused';
         // 下方的播放按钮切换为播放图标
         self.toggleButton.innerHTML = '▶';
+        // 给所有弹幕增加debug，允许高亮
+        DANMAKU.hoverHighLight(true);
     });
 }

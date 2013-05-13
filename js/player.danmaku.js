@@ -39,7 +39,8 @@ var DANMAKU = function( opt, time ) {
     this.dom.style.fontFamily = this.font;
     this.dom.style.opacity = this.opacity;
     // 自己发的弹幕会带边框
-    if( this.isNew ) this.dom.style.boxShadow = '0 0 0 1px ' + this.color + ', 0 0 0 2px rgba(0, 0, 0, .75)';
+    if( this.isNew ) 
+        this.dom.style.boxShadow = '0 0 0 1px ' + this.color + ', 0 0 0 2px rgba(0, 0, 0, .75)';
 
     // 带上响应的特殊class
     this.className = 'danmaku ';
@@ -103,18 +104,16 @@ var DANMAKU = function( opt, time ) {
     this.speed = (stage.width + this.width) / this.lt;
 
     // 为这条弹幕分配坐标
-    this.setPosition();
-    // 放到初始位置上之后再加上transition效果，否则从(0,0)移动到初始位置也会显示出来
-    // setTimeout(function(){
-    //     self.dom.style.transition = 'all ' + 1 / GLOBAL_CONFIG.fps + 's linear';
-    // }, 100);
-    
+    this.setPosition();    
 
     // 加入RUNNING_LIST
     RUNNING_LIST.push(this);
 
     // 在弹幕列表中给这条弹幕加个激活状态
-    if( !this.isNew ) document.querySelector('#d' + this.id);
+    if( !this.isNew ) {
+        var li = document.querySelector('#d' + this.id);
+        li.className = 'active';
+    }
 }
 
 /*
@@ -637,5 +636,24 @@ DANMAKU.frame = function() {
     for( var i = 0; i < RUNNING_LIST.length; i++ ) {
             // 调用每个弹幕实例的运算函数，自己去计算下一帧的状态
             RUNNING_LIST[i].frame();
+    }
+}
+
+/*
+ * 切换是否鼠标悬浮高亮
+ *
+ */
+DANMAKU.hoverHighLight = function(flag) {
+    // DEBUG模式下永远都高亮
+    if( GLOBAL_CONFIG.debug ) return;
+    
+    // 正常模式下暂停高亮
+    var dm = document.querySelectorAll('.danmaku'),
+        len = dm.length;
+    for( var i = 0; i < len; i++ ) {
+        if( flag ) 
+            dm[i].className += ' debug';
+        else
+            removeClass(dm[i], 'debug');
     }
 }

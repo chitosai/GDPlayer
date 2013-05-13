@@ -88,7 +88,6 @@ video{
 }
 .danmaku{
 	color: #fff;
-	cursor: text;
 	display: block;
 	font-size: 25px;
 	letter-spacing: 0;
@@ -114,6 +113,7 @@ video{
 	-webkit-transform-style: preserve-3d;
 }
 .danmaku.debug:hover{
+	cursor: text;
 	color: #f90 !important;
 }
 

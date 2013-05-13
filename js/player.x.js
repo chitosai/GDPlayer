@@ -1,6 +1,6 @@
 // 全局参设置
 var GLOBAL_CONFIG = {
-    'debug'             : true, // 是否开启DEBUG模式
+    'debug'             : false, // 是否开启DEBUG模式
     'update_delay'      : 100,  // 更新弹幕池的间隔
     'fps'               : 30,   // 渲染帧数
     'font'              :
