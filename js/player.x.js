@@ -21,28 +21,6 @@ function init() {
 		video.video.volume = 0;
 		// 初始化弹幕池
 		stage = new STAGE( document.querySelector('#stage'), video );
-
-		// 弹幕发送条里的播放按钮
-		document.querySelector('#toggle-button').addEventListener('click', video.togglePlay);
-
-	    // 绑定发送新弹幕事件
-	    document.querySelector('#do-send-danmaku').addEventListener('click', DANMAKU.send);
-	    document.querySelector('#danmaku-text').addEventListener('keydown', function(e) {
-	    	// 检查是否是回车
-	    	if( e.keyCode == 13 ) DANMAKU.send();
-	    	return false;
-	    });
-	});
-
-	// 预读弹幕
-	var dsl = document.querySelector('#danmaku-source-list');
-	DANMAKU.init( dsl.options[dsl.selectedIndex].value );
-	// 绑定更换弹幕事件
-	dsl.addEventListener('change', function() {
-		// 保证清理RUNNING_LIST的时候彻底，还是先把视频暂停掉吧...
-		video.pause();
-		// 重新加载弹幕
-		DANMAKU.load( dsl.options[dsl.selectedIndex].value );
 	});
 
 	// 初始化用户权限

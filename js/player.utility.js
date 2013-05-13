@@ -272,9 +272,21 @@ var VIDEO = function( video, controller ) {
     this.frame = 0;  // 每帧的计算与显示
     self.timer = 0; // 专门用来更新播放进度
 
-    /* 
-     * 绑定播放控制事件
-     */
+    /*
+     * 初始化事件绑定！ ***************************************************************
+     *
+     */ 
+    // 弹幕发送条里的播放按钮
+    document.querySelector('#toggle-button').addEventListener('click', video.togglePlay);
+
+    // 绑定发送新弹幕事件
+    document.querySelector('#do-send-danmaku').addEventListener('click', DANMAKU.send);
+    document.querySelector('#danmaku-text').addEventListener('keydown', function(e) {
+        // 检查是否是回车
+        if( e.keyCode == 13 ) DANMAKU.send();
+        return false;
+    });
+
     // 绑定点击弹幕舞台切换播放状态
     document.querySelector('#stage').addEventListener( 'click', function(e) {
         // 判断点击来自哪里
@@ -301,6 +313,23 @@ var VIDEO = function( video, controller ) {
     setTimeout(function(){
         document.querySelector('#play-button').style.transition = 'all .3s ease';
     }, 300);
+
+    // 预读弹幕
+    var dsl = document.querySelector('#danmaku-source-list');
+    DANMAKU.init( dsl.options[dsl.selectedIndex].value );
+    // 绑定更换弹幕事件
+    dsl.addEventListener('change', function() {
+        // 保证清理RUNNING_LIST的时候彻底，还是先把视频暂停掉吧...
+        video.pause();
+        // 重新加载弹幕
+        DANMAKU.load( dsl.options[dsl.selectedIndex].value );
+    });
+
+
+
+    /* ******************************************************************************
+     */
+
     
     /*
      * 获取播放进度
