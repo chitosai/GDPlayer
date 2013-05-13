@@ -8,8 +8,10 @@ var GLOBAL_CONFIG = {
     'danmaku_life_time' : 5000, // 弹幕显示时间
     'opacity'           : 1,    // 全局弹幕透明度
     'y_move_duration'   : 200,  // top/bottom弹幕重新排列时移动时间
-    'dm'                : 'ws://localhost:12345/', // 后台弹幕管理中心
+    'dm'                : 'ws://localhost:12306/', // 后台弹幕管理中心
     'ignore_dm'         : false, // 是否允许忽略弹幕管理
+    'block_danmaku'     : 'backend/block.php?did=', // 屏蔽弹幕
+    'block_user'        : 'backend/block.php?uid=', // 屏蔽用户
 };
 
 function init() {
@@ -31,6 +33,9 @@ function init() {
 	ul.addEventListener('change', function() {
 		login(ul.options[ul.selectedIndex].value, 'password');
 	});
+
+	// 右键菜单
+	cm = document.querySelector('#contextmenu');
 }
 
 // 

@@ -69,6 +69,12 @@
         <!-- 弹幕列表 -->
         <div id="danmaku-list"></div>
 
+        <!-- 右键菜单 -->
+        <div id="contextmenu">
+            <a href="javascript:DANMAKU.block();" id="block-this"><span id="block-this-type">屏蔽</span>这条弹幕</a>
+            <a href="javascript:DANMAKU.blockUser();" id="block-user"><span id="block-user-type">屏蔽</span>弹幕发布者</a>
+        </div>
+
 		<!-- Scripts -->
         <script src="js/crypto.sha256.js"></script>
         <script src="js/player.websocket.js"></script>

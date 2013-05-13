@@ -38,9 +38,15 @@ var DANMAKU = function( opt, time ) {
     this.dom.style.fontSize = this.size + 'px';
     this.dom.style.fontFamily = this.font;
     this.dom.style.opacity = this.opacity;
+    // 带上弹幕id和发布者id，用于屏蔽
+    this.dom.setAttribute('did', this.id);
+    this.dom.setAttribute('uid', this.hash);
     // 自己发的弹幕会带边框
     if( this.isNew ) 
         this.dom.style.boxShadow = '0 0 0 1px ' + this.color + ', 0 0 0 2px rgba(0, 0, 0, .75)';
+
+    // 接管右键菜单
+    this.dom.addEventListener('contextmenu', DANMAKU.contextmenu);
 
     // 带上响应的特殊class
     this.className = 'danmaku ';
@@ -639,6 +645,8 @@ DANMAKU.frame = function() {
     }
 }
 
+
+
 /*
  * 切换是否鼠标悬浮高亮
  *
@@ -646,7 +654,7 @@ DANMAKU.frame = function() {
 DANMAKU.hoverHighLight = function(flag) {
     // DEBUG模式下永远都高亮
     if( GLOBAL_CONFIG.debug ) return;
-    
+
     // 正常模式下暂停高亮
     var dm = document.querySelectorAll('.danmaku'),
         len = dm.length;
@@ -656,4 +664,73 @@ DANMAKU.hoverHighLight = function(flag) {
         else
             removeClass(dm[i], 'debug');
     }
+}
+
+
+
+/*
+ * 弹幕右键菜单
+ *
+ */
+DANMAKU.contextmenu = function(e) {
+    // 调整自定义菜单
+    cm.style.left = e.pageX + 'px';
+    cm.style.top = e.pageY + 'px';
+    cm.style.display = 'block';
+
+    cm.setAttribute('did', this.getAttribute('did'));
+    cm.setAttribute('uid', this.getAttribute('uid'));
+
+    // 屏蔽浏览器右键菜单
+    e.preventDefault();
+    return false;
+}
+
+/*
+ * 屏蔽向
+ *
+ */
+// 屏蔽弹幕
+DANMAKU.block = function() {
+    // 屏蔽请求
+    var url = GLOBAL_CONFIG.block_danmaku + cm.getAttribute('did');
+    
+    var xmlhttp = null;
+    if (window.XMLHttpRequest){
+        xmlhttp = new XMLHttpRequest();
+    } else {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    
+    xmlhttp.onreadystatechange = function() {
+        var type = document.querySelector('#block-this-type'),
+            text = type.innerHTML;
+        type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+    }
+
+    // 发起ajax
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
+}
+// 屏蔽用户
+DANMAKU.blockUser = function() {
+    // 屏蔽请求
+    var url = GLOBAL_CONFIG.block_user + cm.getAttribute('uid');
+    
+    var xmlhttp = null;
+    if (window.XMLHttpRequest){
+        xmlhttp = new XMLHttpRequest();
+    } else {
+        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    
+    xmlhttp.onreadystatechange = function() {
+        var type = document.querySelector('#block-user-type'),
+            text = type.innerHTML;
+        type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+    }
+
+    // 发起ajax
+    xmlhttp.open("GET", url, true);
+    xmlhttp.send();
 }

@@ -289,9 +289,12 @@ var VIDEO = function( video, controller ) {
 
     // 绑定点击弹幕舞台切换播放状态
     document.querySelector('#stage').addEventListener( 'click', function(e) {
+        // 首先，如果右键菜单处于展开状态，那么先收起菜单
+        if( cm.style.display == 'block' )
+            cm.style.display = 'none';
         // 判断点击来自哪里
         // 如果直接点击stage或播放按钮可以切换播放状态
-        if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
+        else if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
             self.togglePlay();
         // 如果点击在文字上可能是想复制之类的，不过只在暂停状态下有效
         // 正常播放时点击文字也是暂停效果
