@@ -678,13 +678,18 @@ DANMAKU.contextmenu = function(e) {
     cm.style.top = e.pageY + 'px';
     cm.style.display = 'block';
 
-    cm.setAttribute('did', this.getAttribute('did'));
+    var did = this.getAttribute('did');
+    cm.setAttribute('did', did);
     cm.setAttribute('uid', this.getAttribute('uid'));
+
+    // 给选中的增加高亮class
+    document.querySelector('[did="' + did + '"]').className += ' hover';
 
     // 屏蔽浏览器右键菜单
     e.preventDefault();
     return false;
 }
+
 
 /*
  * 屏蔽向
@@ -693,19 +698,25 @@ DANMAKU.contextmenu = function(e) {
 // 屏蔽弹幕
 DANMAKU.block = function() {
     // 屏蔽请求
-    var url = GLOBAL_CONFIG.block_danmaku + cm.getAttribute('did');
+    var did = cm.getAttribute('did'),
+        url = GLOBAL_CONFIG.block_danmaku + did;
     
     var xmlhttp = null;
-    if (window.XMLHttpRequest){
+    if (window.XMLHttpRequest) {
         xmlhttp = new XMLHttpRequest();
     } else {
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
     
     xmlhttp.onreadystatechange = function() {
-        var type = document.querySelector('#block-this-type'),
-            text = type.innerHTML;
-        type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+        if ( xmlhttp.readyState == 4 ) {
+            var type = document.querySelector('#block-this-type'),
+                text = type.innerHTML;
+            // type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+            // 隐藏弹幕
+            document.querySelector('[did="' + did + '"]').style.display = 'none';
+            cm.style.display = 'none';
+        }
     }
 
     // 发起ajax
@@ -725,9 +736,12 @@ DANMAKU.blockUser = function() {
     }
     
     xmlhttp.onreadystatechange = function() {
-        var type = document.querySelector('#block-user-type'),
-            text = type.innerHTML;
-        type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+        if ( xmlhttp.readyState == 4 ) {
+            var type = document.querySelector('#block-user-type'),
+                text = type.innerHTML;
+            // type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+            cm.style.display = 'none';
+        }
     }
 
     // 发起ajax

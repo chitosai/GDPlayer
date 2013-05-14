@@ -116,6 +116,9 @@ video{
 	cursor: text;
 	color: #f90 !important;
 }
+.danmaku.hover{
+	color: #f90 !important;
+}
 
 #controller{
 	background: #ccc;

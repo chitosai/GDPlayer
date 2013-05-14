@@ -277,7 +277,7 @@ var VIDEO = function( video, controller ) {
      *
      */ 
     // 弹幕发送条里的播放按钮
-    document.querySelector('#toggle-button').addEventListener('click', video.togglePlay);
+    this.toggleButton.addEventListener('click', function() { self.togglePlay(); });
 
     // 绑定发送新弹幕事件
     document.querySelector('#do-send-danmaku').addEventListener('click', DANMAKU.send);
@@ -290,8 +290,10 @@ var VIDEO = function( video, controller ) {
     // 绑定点击弹幕舞台切换播放状态
     document.querySelector('#stage').addEventListener( 'click', function(e) {
         // 首先，如果右键菜单处于展开状态，那么先收起菜单
-        if( cm.style.display == 'block' )
+        if( cm.style.display == 'block' ) {
+            removeClass( document.querySelector('.danmaku.hover'), 'hover');
             cm.style.display = 'none';
+        }
         // 判断点击来自哪里
         // 如果直接点击stage或播放按钮可以切换播放状态
         else if( e.target.id == 'stage' || e.target.id == 'play-button' ) 
@@ -379,7 +381,7 @@ var VIDEO = function( video, controller ) {
         self.video.play();
     };
     // 变更播放状态
-    this.togglePlay = function( callback ) {
+    this.togglePlay = function() {
         if( !self.video.paused ) {
             self.pause();
         } else {
