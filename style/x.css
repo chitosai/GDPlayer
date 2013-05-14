@@ -32,6 +32,9 @@ body{
 #danmaku-filter{
 	top: 190px;
 }
+#global-filter{
+	top: 250px;
+}
 #filter-content{
 	border: 1px solid #777;
 	padding: 2px 3px;
@@ -115,6 +118,7 @@ video{
 	position: absolute;
 	/* 允许字体小于12px */
 	-webkit-text-size-adjust: none;
+	transition: opacity .3s ease;
 }
 .scrollDanmaku{
 	padding: 1.5px 0 1.5px 5px;

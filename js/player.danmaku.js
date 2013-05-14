@@ -28,7 +28,6 @@ var DANMAKU = function( opt, time ) {
     this.opacity     = GLOBAL_CONFIG.opacity;
     this.font        = GLOBAL_CONFIG.font;
     this.lt          = GLOBAL_CONFIG.danmaku_life_time;
-    this.ctime       = time;
 
     // 检查是否被过滤！
     var content_filter_list = CONTENT_FILTER_LIST,
@@ -136,6 +135,9 @@ var DANMAKU = function( opt, time ) {
         var li = document.querySelector('#d' + this.id);
         li.className = 'active';
     }
+
+    // 记录创建时间
+    this.ctime = this.lastTime = time;
 }
 
 /*
@@ -182,13 +184,18 @@ DANMAKU.prototype.frame = function() {
         this.remove();
     }
 
+    // 全局滤镜
+    for( var i = 0; i < DANMAKU.filter.length; i++ ) {
+        DANMAKU.filter[i](this);
+    }
+
     // 在DEBUG模式下显示对象属性到DOM上
     this.displayProperty();
 
     // 根据弹幕类别来决定action
     switch( this.mode ) {
         case 1 : // 水平移动
-                this.x = this.speed * (this.lt - timePassed) - this.width; 
+                this.x -= this.speed * ( time - this.lastTime );
                 this.dom.style.left = this.x + 'px';
                 this.dom.style.top =  this.y + 'px';
                 break;
@@ -215,7 +222,7 @@ DANMAKU.prototype.frame = function() {
                 } 
                 break;
         case 6 : // 逆向弹幕的水平移动方向与1相反
-                this.x = this.speed * timePassed - this.width; 
+                this.x = this.speed * ( time - this.lastTime ); 
                 this.dom.style.left = this.x + 'px';
                 this.dom.style.top =  this.y + 'px';
                 break;
@@ -232,6 +239,7 @@ DANMAKU.prototype.frame = function() {
                 }
                 break;
     }
+    this.lastTime = time;
 }
 
 /*
@@ -770,7 +778,7 @@ DANMAKU.blockUser = function() {
  *
  */
 CONTENT_FILTER_LIST = [];
-DANMAKU.filter = function() {
+DANMAKU.addContentFilter = function() {
     var c = document.querySelector('#filter-content'),
         type = document.querySelector('#filter-type').value,
         keyword = '';

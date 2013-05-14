@@ -43,6 +43,12 @@
                 <button id="apply-filter">应用</button>
             </div>
         </div>
+        <!-- 弹幕全局滤镜 -->
+        <div id="global-filter" class="global-config">
+            全局滤镜&nbsp;
+            <label for="filter-opacity"><input type="checkbox" name="global-filter" filter="opacity" id="filter-opacity">降低不透明度</label>
+            <label for="filter-speed"><input type="checkbox" name="global-filter" filter="speed" id="filter-speed">加速</label>
+        </div>
         
         <div id="wrapper">
             <div id="player">
@@ -94,6 +100,7 @@
 		<script src="js/player.utility.js"></script>
         <script src="js/player.danmaku.js"></script>
         <script src="js/player.danmaku.spaceManager.js"></script>
+        <script src="js/player.danmaku.filter.js"></script>
 		<script src="js/player.x.js"></script>
 	</body>
 </html>

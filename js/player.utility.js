@@ -40,6 +40,11 @@ Array.prototype.bsearch = function( what, how ) {
 Array.prototype.binsert = function(what,how) {
     this.splice( this.bsearch(what, how), 0, what );
 };
+// 清空
+Array.prototype.empty = function() {
+    while( this.length ) 
+        this.pop();
+}
 
 
 /*
@@ -210,14 +215,14 @@ var MSG = function() {
  */
 function DEBUG(msg) {
     if( arguments.length == 1 ) {
-        // 判断是否是文本
-        // 文本的加上时间戳
-        var date = new Date(),
-            time = '[' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ']';
-        console.log( time + msg );
-
-        // 其他不要乱来
-        console.log(msg);
+        if( typeof msg == 'string' || typeof msg == 'number' ) {
+            // 判断是否是文本或数字，是的话加上时间戳
+            var date = new Date(),
+                time = '[' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ']';
+            console.log( time + msg );
+        } else 
+            // 其他不要乱来
+            console.log(msg);
     } else {
         // 多个参数就全部输出吧
         console.log(arguments);
@@ -339,8 +344,14 @@ var VIDEO = function( video, controller ) {
         DANMAKU.load( dsl.options[dsl.selectedIndex].value );
     });
 
-    // 增加弹幕过滤
-    document.querySelector('#apply-filter').addEventListener('click', DANMAKU.filter);
+    // 增加弹幕内容过滤器
+    document.querySelector('#apply-filter').addEventListener('click', DANMAKU.addContentFilter);
+
+    // 全局滤镜
+    var gf = document.querySelectorAll('[name="global-filter"]');
+    for( var i = 0; i < gf.length; i++ ) {
+        gf[i].addEventListener('change', DANMAKU.applyFilter);
+    }
 
     /* ******************************************************************************
      */
