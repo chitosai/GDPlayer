@@ -126,11 +126,11 @@ video{
 }
 .bottomDanmaku{
 	text-align: center;
-	padding: 1.75px 0 1.75px 5px;
+	padding: 1.75px 5px;
 }
 .topDanmaku{
 	text-align: center;
-	padding: 1.75px 0 1.75px 5px;
+	padding: 1.75px 5px;
 }
 .specialDanmaku{
 	-webkit-transform-style: preserve-3d;

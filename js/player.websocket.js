@@ -53,7 +53,7 @@ function socket() {
         // 延迟插入弹幕列表，防止弹幕出现两次
         setTimeout( function() {
           DANMAKU.insert(danmaku);
-        }, 1000);
+        }, GLOBAL_CONFIG.danmaku_life_time);
       } else {
         // 如果现在不在显示周期内，那就无所谓了
         DANMAKU.insert(danmaku);

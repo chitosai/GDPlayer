@@ -222,7 +222,7 @@ DANMAKU.prototype.frame = function() {
                 } 
                 break;
         case 6 : // 逆向弹幕的水平移动方向与1相反
-                this.x = this.speed * ( time - this.lastTime ); 
+                this.x += this.speed * ( time - this.lastTime ); 
                 this.dom.style.left = this.x + 'px';
                 this.dom.style.top =  this.y + 'px';
                 break;
