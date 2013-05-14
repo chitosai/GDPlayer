@@ -92,11 +92,14 @@ class DanmakuManager extends WebSocket {
   	parse_str($req, $params);
   	$state = validateRequest($params);
 	if( $state !== true ) {
-		$return = $state;
+		// 错误消息只返回给发送者
+		// 但是本地开两个连接的话好像是同一个socket...
+		$this->send($user->socket, $state);
 	} else {
 		$return = InsertDanmaku($params);
+		// 合法的弹幕推送给所有用户
+    	$this->push($return);
 	}
-    $this->push($return);
   }
 }
 
