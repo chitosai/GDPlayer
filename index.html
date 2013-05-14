@@ -9,18 +9,17 @@
         <!-- 数媒的logo -->
         <img src="style/logo.png" alt="" id="logo">
         <!-- 选择演示弹幕 -->
-        <div id="select-danmaku">
+        <div id="select-danmaku" class="global-config">
             弹幕源&nbsp;
             <select name="" id="danmaku-source-list">
                 <option value="local/av364356.xml" selected>av364356</option>
                 <option value="local/av505538.xml">av505538</option>
                 <option value="local/av122647.xml">av122647</option>
                 <option value="local/test-x.xml">收集</option>
-                <option value="backend/DM.php">测试</option>
             </select>
         </div>
         <!-- 选择用户身份 -->
-        <div id="select-user">
+        <div id="select-user" class="global-config">
             用户&nbsp;
             <select name="" id="user-list">
                 <option value="super1">高级权限1</option>
@@ -29,6 +28,20 @@
                 <option value="normal2">普通权限2</option>
                 <option value="blocked1">被封禁1</option>
             </select>
+        </div>
+        <!-- 弹幕过滤 -->
+        <div id="danmaku-filter" class="global-config">
+            <div>
+                弹幕过滤&nbsp;
+                <select name="" id="filter-type">
+                    <option value="keyword">关键词</option>
+                    <option value="regx">正则</option>
+                </select>
+            </div>
+            <div>
+                <input type="text" id="filter-content">
+                <button id="apply-filter">应用</button>
+            </div>
         </div>
         
         <div id="wrapper">

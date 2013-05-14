@@ -209,16 +209,22 @@ var MSG = function() {
  * 
  */
 function DEBUG(msg) {
-    // 非文本不要乱来
-    if( typeof msg != 'string' ) {
+    if( arguments.length == 1 ) {
+        // 判断是否是文本
+        // 文本的加上时间戳
+        var date = new Date(),
+            time = '[' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ']';
+        console.log( time + msg );
+
+        // 其他不要乱来
+        console.log(msg);
+    } else {
+        // 多个参数就全部输出吧
         console.log(arguments);
         return;
     }
 
-    // 文本的加上时间戳
-    var date = new Date(),
-        time = '[' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ']';
-    console.log( time + msg );
+    
 }
 
 
@@ -272,10 +278,13 @@ var VIDEO = function( video, controller ) {
     this.frame = 0;  // 每帧的计算与显示
     self.timer = 0; // 专门用来更新播放进度
 
+
+
     /*
      * 初始化事件绑定！ ***************************************************************
      *
      */ 
+
     // 弹幕发送条里的播放按钮
     this.toggleButton.addEventListener('click', function() { self.togglePlay(); });
 
@@ -330,7 +339,8 @@ var VIDEO = function( video, controller ) {
         DANMAKU.load( dsl.options[dsl.selectedIndex].value );
     });
 
-
+    // 增加弹幕过滤
+    document.querySelector('#apply-filter').addEventListener('click', DANMAKU.filter);
 
     /* ******************************************************************************
      */

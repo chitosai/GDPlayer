@@ -15,21 +15,40 @@ body{
 	left: 0;
 	z-index: 0;
 }
-#select-danmaku,
-#select-user{
+.global-config{
 	border-left: 3px solid;
 	font-size: 12px;
 	line-height: 1;
 	padding: 0 7px;
 	position: absolute;
+	left: 10px;
 }
 #select-danmaku{
 	top: 130px;
-	left: 10px;
 }
 #select-user{
 	top: 160px;
-	left: 10px;
+}
+#danmaku-filter{
+	top: 190px;
+}
+#filter-content{
+	border: 1px solid #777;
+	padding: 2px 3px;
+}
+#filter-content:focus{
+	border-color: #69f;
+}
+#apply-filter{
+	border: 1px solid #999;
+	border-radius: 1px;
+	color: #555;
+	line-height: 18px;
+}
+#apply-filter:hover{
+	background: #f3f3f3;
+	border-color: #333;
+	color: #111;
 }
 
 #wrapper{

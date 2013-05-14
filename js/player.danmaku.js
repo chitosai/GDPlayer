@@ -30,6 +30,22 @@ var DANMAKU = function( opt, time ) {
     this.lt          = GLOBAL_CONFIG.danmaku_life_time;
     this.ctime       = time;
 
+    // 检查是否被过滤！
+    var content_filter_list = CONTENT_FILTER_LIST,
+        fl = content_filter_list.length;
+    for( var i = 0; i < fl; i++ ) {
+        // 纯文本直接查找是否包含
+        if( typeof content_filter_list[i] == 'string' ) {
+            if( this.text.indexOf(content_filter_list[i]) >= 0 )
+                return false;
+        } else
+        // 正则的话匹配一下试试
+        if( typeof content_filter_list[i] == 'object' ) {
+            if( content_filter_list[i].test(this.text))
+                return false;
+        }
+    }
+
     // 生成文本节点！
     this.dom = document.createElement('div');
     this.dom.className = 'danmaku';
@@ -747,4 +763,26 @@ DANMAKU.blockUser = function() {
     // 发起ajax
     xmlhttp.open("GET", url, true);
     xmlhttp.send();
+}
+
+/*
+ * 内容过滤
+ *
+ */
+CONTENT_FILTER_LIST = [];
+DANMAKU.filter = function() {
+    var c = document.querySelector('#filter-content'),
+        type = document.querySelector('#filter-type').value,
+        keyword = '';
+
+    switch( type ) {
+        case 'keyword' : keyword = c.value; break;
+        case 'regx' : keyword = new RegExp(c.value); break;
+    }
+
+    CONTENT_FILTER_LIST.push(keyword);
+    c.value = '';
+
+    // 输出一下好了
+    DEBUG( CONTENT_FILTER_LIST );
 }
