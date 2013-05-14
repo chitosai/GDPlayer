@@ -38,7 +38,7 @@ function InsertDanmaku( $params ) {
 function validateRequest($params) {
 	// 检查身份
 	$user = check_login($params);
-	if( gettype($user) === string )
+	if( is_string($user) )
 		return $user;
 
 	// 检查是否是要求发送弹幕
@@ -55,8 +55,34 @@ function validateRequest($params) {
 	if( intval($user['privilege']) < intval($params['mode']) )
 		return '权限不足';
 
+	// 内容审查
+	if( !keywords_filter( $params['text'] ) )
+		return '包含不合适的内容';
+
 	return true;
 }
+
+
+/*
+ * 内容审核
+ *
+ */
+function keywords_filter( $content ) {
+	$db = new mysql();
+	$keywords = $db->select(array(
+		'table' => 'keywords'
+	));
+	// 遍历关键词，依次检查
+	foreach( $keywords as $kw ) {
+		echo strpos( $content, $kw['keywords']['keyword'] );
+		if( strpos( $content, $kw['keywords']['keyword'] ) !== false )
+			return false;
+	}
+
+	// 没问题
+	return true;
+}
+
 
 /*-------------------------------------------------------------------------------*/
 class DanmakuManager extends WebSocket {

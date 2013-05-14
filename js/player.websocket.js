@@ -46,16 +46,22 @@ function socket() {
         MSG('弹幕发送成功');
       }
 
-      // 插入！
-      DANMAKU.insert(danmaku);
       // 手动检查，如果播放进度已经超过该弹幕的出现时间点，但该弹幕还在生命周期内那就手动把它显示出来
       if( danmaku.stime < TIME && ( danmaku.stime + GLOBAL_CONFIG.danmaku_life_time ) > TIME ) {
+        // 立即把弹幕插入弹幕池
         new DANMAKU( danmaku, TIME );
+        // 延迟插入弹幕列表，防止弹幕出现两次
+        setTimeout( function() {
+          DANMAKU.insert(danmaku);
+        }, 1000);
+      } else {
+        // 如果现在不在显示周期内，那就无所谓了
+        DANMAKU.insert(danmaku);
       }
     };
 
     ////////
-    this.socket.onclose   = function(msg) { 
+    this.socket.onclose = function(msg) { 
       // 把全局设置改为允许忽略弹幕服务器
       GLOBAL_CONFIG.ignore_dm = true;
       // 显示出离线提示
@@ -63,11 +69,9 @@ function socket() {
       MSG("无法连接弹幕服务器，进入离线模式"); 
     };
 
-
   } catch(ex) { 
     MSG(ex); 
   }
-
 }
 
 socket.prototype.send = function(msg) {
