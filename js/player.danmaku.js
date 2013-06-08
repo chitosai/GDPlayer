@@ -750,7 +750,8 @@ DANMAKU.block = function() {
 // 屏蔽用户
 DANMAKU.blockUser = function() {
     // 屏蔽请求
-    var url = GLOBAL_CONFIG.block_user + cm.getAttribute('uid');
+    var uid = cm.getAttribute('uid'),
+        url = GLOBAL_CONFIG.block_user + uid;
     
     var xmlhttp = null;
     if (window.XMLHttpRequest){
@@ -764,6 +765,7 @@ DANMAKU.blockUser = function() {
             var type = document.querySelector('#block-user-type'),
                 text = type.innerHTML;
             // type.innerHTML = text == '屏蔽' ? '解除屏蔽' : '屏蔽';
+            document.querySelector('[uid="' + uid + '"]').style.display = 'none';
             cm.style.display = 'none';
         }
     }
