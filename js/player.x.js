@@ -1,6 +1,7 @@
 // 全局参设置
 var GLOBAL_CONFIG = {
     'debug'             : false, // 是否开启DEBUG模式
+    'hide_danmaku'      : false, // 是否开启隐藏弹幕模式
     'update_delay'      : 100,  // 更新弹幕池的间隔
     'fps'               : 30,   // 渲染帧数
     'font'              :

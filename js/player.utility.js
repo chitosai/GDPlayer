@@ -353,6 +353,9 @@ var VIDEO = function( video, controller ) {
         gf[i].addEventListener('change', DANMAKU.applyFilter);
     }
 
+    // 隐藏弹幕
+    document.querySelector('#hide-danmaku').addEventListener('click', DANMAKU.hideDanmaku);
+
     /* ******************************************************************************
      */
 

@@ -65,7 +65,14 @@ var DANMAKU = function( opt, time ) {
 
     // 带上响应的特殊class
     this.className = 'danmaku ';
+
+    // 是否开启全局隐藏弹幕模式
+    if( GLOBAL_CONFIG.hide_danmaku ) this.className += 'hide ';
+
+    // 是否在DEBUG模式中
     if( GLOBAL_CONFIG.debug ) this.className += 'debug ';
+
+    // 带上弹幕类别class
     switch( this.mode ) {
         case 1 :
         case 6 : this.className += 'scrollDanmaku'; break;
@@ -795,4 +802,21 @@ DANMAKU.addContentFilter = function() {
 
     // 输出一下好了
     DEBUG( CONTENT_FILTER_LIST );
+}
+
+// 隐藏弹幕
+DANMAKU.hideDanmaku = function() {
+    var self = document.querySelector('#hide-danmaku'),
+        dl = document.querySelectorAll('.danmaku');
+    if( self.checked ) {
+        GLOBAL_CONFIG.hide_danmaku = true;
+        for( var i = 0; i < dl.length; i++ ) {
+            dl[i].className += ' hide';
+        }
+    } else {
+        GLOBAL_CONFIG.hide_danmaku = false;
+        for( var i = 0; i < dl.length; i++ ) {
+            removeClass(dl[i], 'hide');
+        }
+    }
 }

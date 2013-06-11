@@ -35,6 +35,9 @@ body{
 #global-filter{
 	top: 250px;
 }
+#hide-danmaku-container{
+	top: 280px;
+}
 #filter-content{
 	border: 1px solid #777;
 	padding: 2px 3px;
@@ -142,6 +145,9 @@ video{
 }
 .danmaku.hover{
 	color: #f90 !important;
+}
+.danmaku.hide{
+	display: none;
 }
 
 #controller{
